@@ -9,7 +9,7 @@
     public class TypeBasedSagaMetaModelTests
     {
         [Test]
-        public void ParseSagaEntities()
+        public void FindSagasByEntityName()
         {
             var model = TypeBasedSagaMetaModel.Create<MySaga>();
 
@@ -18,6 +18,18 @@
 
             Assert.NotNull(metadata);
         }
+
+        [Test]
+        public void FindUniquePropertiesByAttribute()
+        {
+            var model = TypeBasedSagaMetaModel.Create<MySaga>();
+
+            var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
+
+
+            Assert.AreEqual("UniqueProperty",metadata.UniqueProperties.Single());
+        }
+
 
         [Test]
         public void FilterOutNonSagaTypes()
@@ -33,7 +45,10 @@
             }
         }
 
-        class MyEntity:ContainSagaData
-        { }
+        class MyEntity : ContainSagaData
+        {
+            [Unique]
+            public int UniqueProperty { get; set; }
+        }
     }
 }

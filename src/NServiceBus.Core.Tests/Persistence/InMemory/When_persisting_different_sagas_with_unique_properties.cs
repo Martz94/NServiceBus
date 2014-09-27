@@ -12,15 +12,15 @@
         public void  It_should_persist_successfully()
         {
             var saga1 = new SagaWithTwoUniquePropertiesData { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
-            var saga2 = new AnotherSagaWithTwoUniqueProperties { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
+            var saga2 = new AnotherSagaWithTwoUniquePropertiesData { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
             var saga3 = new SagaWithUniquePropertyData {Id = Guid.NewGuid(), UniqueString = "whatever"};
 
             var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel
                 .Create(new[]
                 {
-                    typeof(SagaWithTwoUniquePropertiesData),
+                    typeof(SagaWithTwoUniqueProperties),
                     typeof(AnotherSagaWithTwoUniqueProperties),
-                    typeof(SagaWithUniquePropertyData)
+                    typeof(SagaWithUniqueProperty)
                 }));
 
 

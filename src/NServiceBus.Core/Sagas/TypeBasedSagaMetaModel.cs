@@ -22,11 +22,20 @@ namespace NServiceBus.Features
         {
             var sagaEntityType = sagaType.BaseType.GetGenericArguments().Single();
 
+            var uniquePropertiesOnEntity = FindUniqueAttributes(sagaEntityType);
+
             return new SagaMetaData
             {
-                EntityName = sagaEntityType.FullName
+                EntityName = sagaEntityType.FullName,
+                UniqueProperties = uniquePropertiesOnEntity
             };
         }
+
+        static IEnumerable<string> FindUniqueAttributes(Type sagaEntityType)
+        {
+            return UniqueAttribute.GetUniqueProperties(sagaEntityType).Select(pt => pt.Name);
+        }
+
         private TypeBasedSagaMetaModel(List<SagaMetaData> metadata)
         {
             foreach (var sagaMetaData in metadata)
