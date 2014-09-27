@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Core.Tests.Sagas.TypeBasedSagas
 {
+    using System.Linq;
     using NServiceBus.Features;
     using NServiceBus.Saga;
     using NUnit.Framework;
@@ -17,6 +18,13 @@
 
             Assert.NotNull(metadata);
         }
+
+        [Test]
+        public void FilterOutNonSagaTypes()
+        {
+            Assert.AreEqual(1,TypeBasedSagaMetaModel.Create(new []{typeof(MySaga),typeof(string)}).All.Count());
+        }
+
         class MySaga:Saga<MyEntity>
         {
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MyEntity> mapper)

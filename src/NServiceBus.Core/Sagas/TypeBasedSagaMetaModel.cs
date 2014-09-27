@@ -1,57 +1,61 @@
 namespace NServiceBus.Features
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
-    using System.Reflection;
+    using System.Linq;
     using NServiceBus.Saga;
 
     class TypeBasedSagaMetaModel:ISagaMetaModel
     {
-        readonly Dictionary<string, SagaMetaData> metadata;
+        readonly Dictionary<string, SagaMetaData> model = new Dictionary<string, SagaMetaData>();
 
         public static ISagaMetaModel Create(IList<Type> availableTypes)
         {
-            var metadata = new Dictionary<string,SagaMetaData>();
-
-
-            return new TypeBasedSagaMetaModel(metadata);
+            return new TypeBasedSagaMetaModel(availableTypes.Where(t=>typeof(Saga).IsAssignableFrom(t))
+                .Select(GenerateModel).ToList());
         }
         internal static ISagaMetaModel Create<TSaga>() where TSaga : Saga
         {
-            var metadata = new Dictionary<string, SagaMetaData>();
-
-            var model = GenerateModel(typeof(TSaga));
-
-            metadata[model.SagaEntityName] = model;
-            return new TypeBasedSagaMetaModel(metadata);
+            return new TypeBasedSagaMetaModel(new List<SagaMetaData>{GenerateModel(typeof(TSaga))});
         }
         static SagaMetaData GenerateModel(Type sagaType)
         {
+            var sagaEntityType = sagaType.BaseType.GetGenericArguments().Single();
+
             return new SagaMetaData
             {
-                SagaEntityName = sagaType.FullName
+                EntityName = sagaEntityType.FullName
             };
         }
-        private TypeBasedSagaMetaModel(Dictionary<string, SagaMetaData> metadata)
+        private TypeBasedSagaMetaModel(List<SagaMetaData> metadata)
         {
-            this.metadata = metadata;
+            foreach (var sagaMetaData in metadata)
+            {
+                model[sagaMetaData.EntityName] = sagaMetaData;
+            }
         }   
 
         public SagaMetaData FindByEntityName(string name)
         {
-            return metadata[name];
+            return model[name];
+        }
+
+        public IEnumerable<SagaMetaData> All
+        {
+            get { return model.Values; }
         }
     }
 
     interface ISagaMetaModel
     {
         SagaMetaData FindByEntityName(string name);
+
+        IEnumerable<SagaMetaData> All { get; } 
     }
 
     class SagaMetaData
     {
         public IEnumerable<string> UniqueProperties;
-        public string SagaEntityName;
+        public string EntityName;
     }
 }
