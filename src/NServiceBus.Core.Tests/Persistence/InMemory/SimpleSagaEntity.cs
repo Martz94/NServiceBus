@@ -3,6 +3,13 @@ namespace NServiceBus.SagaPersisters.InMemory.Tests
     using System;
     using Saga;
 
+    class SimpleSagaEntitySaga:Saga<SimpleSagaEntity>
+    {
+        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SimpleSagaEntity> mapper)
+        {
+            
+        }
+    }
     public class SimpleSagaEntity : IContainSagaData
     {
         public Guid Id { get; set; }

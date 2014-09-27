@@ -26,30 +26,19 @@ namespace NServiceBus.Features
             metadata[model.SagaEntityName] = model;
             return new TypeBasedSagaMetaModel(metadata);
         }
-
-        internal static ISagaMetaModel CreateForEntity<TSaga>() where TSaga : IContainSagaData
+        static SagaMetaData GenerateModel(Type sagaType)
         {
-            var metadata = new Dictionary<string, SagaMetaData>();
-
-            var model = GenerateModel(typeof(TSaga));
-
-            metadata[model.SagaEntityName] = model;
-             return new TypeBasedSagaMetaModel(metadata);
+            return new SagaMetaData
+            {
+                SagaEntityName = sagaType.FullName
+            };
         }
-
-        static SagaMetaData GenerateModel(Type sagaEntityType)
-        {
-            return new SagaMetaData();
-            
-
-        }
-
         private TypeBasedSagaMetaModel(Dictionary<string, SagaMetaData> metadata)
         {
             this.metadata = metadata;
         }   
 
-        public SagaMetaData FindByName(string name)
+        public SagaMetaData FindByEntityName(string name)
         {
             return metadata[name];
         }
@@ -57,7 +46,7 @@ namespace NServiceBus.Features
 
     interface ISagaMetaModel
     {
-        SagaMetaData FindByName(string name);
+        SagaMetaData FindByEntityName(string name);
     }
 
     class SagaMetaData

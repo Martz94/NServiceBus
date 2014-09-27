@@ -11,12 +11,12 @@ namespace NServiceBus.SagaPersisters.InMemory.Tests
         [Test]
         public void It_should_persist_successfully()
         {
-            var saga1 = new SagaWithUniqueProperty{Id = Guid.NewGuid(), UniqueString = "whatever"};
-            var saga2 = new SagaWithUniqueProperty{Id = Guid.NewGuid(), UniqueString = "whatever"};
-            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.CreateForEntity<SagaWithUniqueProperty>());
+            var saga1 = new SagaWithUniquePropertyData{Id = Guid.NewGuid(), UniqueString = "whatever"};
+            var saga2 = new SagaWithUniquePropertyData{Id = Guid.NewGuid(), UniqueString = "whatever"};
+            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create<SagaWithUniqueProperty>());
             
             inMemorySagaPersister.Save(saga1);
-            saga1 = inMemorySagaPersister.Get<SagaWithUniqueProperty>(saga1.Id);
+            saga1 = inMemorySagaPersister.Get<SagaWithUniquePropertyData>(saga1.Id);
             saga1.UniqueString = "whatever2";
             inMemorySagaPersister.Update(saga1);
 

@@ -11,13 +11,13 @@
         [Test]
         public void Should_delete_the_saga()
         {
-            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.CreateForEntity<TestSaga>());
-            var saga = new TestSaga { Id = Guid.NewGuid() };
+            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create<TestSaga>());
+            var saga = new TestSagaData { Id = Guid.NewGuid() };
             
             inMemorySagaPersister.Save(saga);
-            Assert.NotNull(inMemorySagaPersister.Get<TestSaga>(saga.Id));
+            Assert.NotNull(inMemorySagaPersister.Get<TestSagaData>(saga.Id));
             inMemorySagaPersister.Complete(saga);
-            Assert.Null(inMemorySagaPersister.Get<TestSaga>(saga.Id));
+            Assert.Null(inMemorySagaPersister.Get<TestSagaData>(saga.Id));
         }
     }
 }

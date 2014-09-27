@@ -77,7 +77,7 @@ namespace NServiceBus.InMemory.SagaPersister
 
         private void ValidateUniqueProperties(IContainSagaData saga)
         {
-            var sagaMetaData = sagaModel.FindByName(saga.GetType().FullName);
+            var sagaMetaData = sagaModel.FindByEntityName(saga.GetType().FullName);
 
 
             if (!sagaMetaData.UniqueProperties.Any()) return;

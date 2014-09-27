@@ -11,16 +11,16 @@
         [Test]
         public void  It_should_persist_successfully()
         {
-            var saga1 = new SagaWithTwoUniqueProperties { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
+            var saga1 = new SagaWithTwoUniquePropertiesData { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
             var saga2 = new AnotherSagaWithTwoUniqueProperties { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
-            var saga3 = new SagaWithUniqueProperty {Id = Guid.NewGuid(), UniqueString = "whatever"};
+            var saga3 = new SagaWithUniquePropertyData {Id = Guid.NewGuid(), UniqueString = "whatever"};
 
             var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel
                 .Create(new[]
                 {
-                    typeof(SagaWithTwoUniqueProperties),
+                    typeof(SagaWithTwoUniquePropertiesData),
                     typeof(AnotherSagaWithTwoUniqueProperties),
-                    typeof(SagaWithUniqueProperty)
+                    typeof(SagaWithUniquePropertyData)
                 }));
 
 

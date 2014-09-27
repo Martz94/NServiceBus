@@ -8,7 +8,7 @@
     [TestFixture]
     class When_saga_not_found_return_default
     {
-        InMemorySagaPersister persister = new InMemorySagaPersister(TypeBasedSagaMetaModel.CreateForEntity<SimpleSagaEntity>());
+        InMemorySagaPersister persister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create<SimpleSagaEntitySaga>());
         
         [Test]
         public void Should_return_default_when_using_finding_saga_with_property()
