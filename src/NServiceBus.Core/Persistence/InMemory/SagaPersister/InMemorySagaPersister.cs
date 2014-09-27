@@ -5,6 +5,7 @@ namespace NServiceBus.InMemory.SagaPersister
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using NServiceBus.Features;
     using Saga;
     using Serializers.Json;
 
@@ -13,6 +14,14 @@ namespace NServiceBus.InMemory.SagaPersister
     /// </summary>
     class InMemorySagaPersister : ISagaPersister
     {
+        readonly ISagaMetaModel sagaModel;
+
+        public InMemorySagaPersister(ISagaMetaModel sagaModel)
+        {
+            this.sagaModel = sagaModel;
+        }
+
+    
         public void Complete(IContainSagaData saga)
         {
             VersionedSagaEntity value;
@@ -68,8 +77,10 @@ namespace NServiceBus.InMemory.SagaPersister
 
         private void ValidateUniqueProperties(IContainSagaData saga)
         {
-            var uniqueProperties = UniqueAttribute.GetUniqueProperties(saga.GetType());
-            if (!uniqueProperties.Any()) return;
+            var sagaMetaData = sagaModel.FindByName(saga.GetType().FullName);
+
+
+            if (!sagaMetaData.UniqueProperties.Any()) return;
 
             var sagasFromSameType = from s in data
                                     where
@@ -77,8 +88,10 @@ namespace NServiceBus.InMemory.SagaPersister
                                     select s.Value;
 
             foreach (var storedSaga in sagasFromSameType)
-                foreach (var uniqueProperty in uniqueProperties)
+                foreach (var uniquePropertyName in sagaMetaData.UniqueProperties)
                 {
+                    var uniqueProperty = saga.GetType().GetProperty(uniquePropertyName);
+
                     if (uniqueProperty.CanRead)
                     {
                         var inComingSagaPropertyValue = uniqueProperty.GetValue(saga, null);

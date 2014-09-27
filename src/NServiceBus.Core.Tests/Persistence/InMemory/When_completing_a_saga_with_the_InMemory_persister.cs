@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.SagaPersisters.InMemory.Tests
 {
     using System;
+    using NServiceBus.Features;
     using NServiceBus.InMemory.SagaPersister;
     using NUnit.Framework;
 
@@ -10,7 +11,7 @@
         [Test]
         public void Should_delete_the_saga()
         {
-            var inMemorySagaPersister = new InMemorySagaPersister();
+            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.CreateForEntity<TestSaga>());
             var saga = new TestSaga { Id = Guid.NewGuid() };
             
             inMemorySagaPersister.Save(saga);

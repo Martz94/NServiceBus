@@ -180,6 +180,7 @@
     <Compile Include="Persistence\Storage.cs" />
     <Compile Include="Pipeline\PipelineModifications.cs" />
     <Compile Include="Sagas\SagaConfigurationCache.cs" />
+    <Compile Include="Sagas\TypeBasedSagaMetaModel.cs" />
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />
     <Compile Include="Scheduling\Scheduler.cs" />
     <Compile Include="Scheduling\TaskDefinition.cs" />

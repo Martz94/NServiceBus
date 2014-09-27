@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Unicast.Tests
 {
     using System;
+    using System.Collections.Generic;
     using Contexts;
     using InMemory.SagaPersister;
     using NServiceBus.Features;
@@ -18,7 +19,9 @@
         [SetUp]
         public new void SetUp()
         {
-            persister = new InMemorySagaPersister();
+            //todo
+            persister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create(new List<Type>()));
+
             FuncBuilder.Register<ISagaPersister>(() => persister);
 
             sagas = new Sagas();

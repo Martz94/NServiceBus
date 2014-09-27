@@ -44,6 +44,11 @@
 
             context.Container.RegisterSingleton(sagaConfigurationCache);
 
+            var sagaMetaModel = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes());
+
+
+            context.Container.RegisterSingleton(sagaMetaModel);
+
             foreach (var t in context.Settings.GetAvailableTypes())
             {
                 if (IsSagaType(t))

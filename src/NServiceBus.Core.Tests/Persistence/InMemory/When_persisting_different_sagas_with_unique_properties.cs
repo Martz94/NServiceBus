@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.SagaPersisters.InMemory.Tests
 {
     using System;
+    using NServiceBus.Features;
     using NServiceBus.InMemory.SagaPersister;
     using NUnit.Framework;
 
@@ -13,8 +14,15 @@
             var saga1 = new SagaWithTwoUniqueProperties { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
             var saga2 = new AnotherSagaWithTwoUniqueProperties { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 5 };
             var saga3 = new SagaWithUniqueProperty {Id = Guid.NewGuid(), UniqueString = "whatever"};
-            
-            var inMemorySagaPersister = new InMemorySagaPersister();
+
+            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel
+                .Create(new[]
+                {
+                    typeof(SagaWithTwoUniqueProperties),
+                    typeof(AnotherSagaWithTwoUniqueProperties),
+                    typeof(SagaWithUniqueProperty)
+                }));
+
 
             inMemorySagaPersister.Save(saga1);
             inMemorySagaPersister.Save(saga2);
