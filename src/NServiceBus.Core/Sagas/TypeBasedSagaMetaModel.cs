@@ -11,7 +11,7 @@ namespace NServiceBus.Features
 
         public static ISagaMetaModel Create(IList<Type> availableTypes)
         {
-            return new TypeBasedSagaMetaModel(availableTypes.Where(t=>typeof(Saga).IsAssignableFrom(t))
+            return new TypeBasedSagaMetaModel(availableTypes.Where(t=>typeof(Saga).IsAssignableFrom(t) && t!=typeof(Saga) && !t.IsGenericType)
                 .Select(GenerateModel).ToList());
         }
         static SagaMetaData GenerateModel(Type sagaType)
