@@ -35,7 +35,7 @@
             };
             persister.Save(simpleSagaEntity);
 
-            var anotherSagaEntity = persister.Get<AnotherSimpleSageEntity>(id);
+            var anotherSagaEntity = persister.Get<AnotherSimpleSagaEntity>(id);
             Assert.IsNull(anotherSagaEntity);
         }
     }

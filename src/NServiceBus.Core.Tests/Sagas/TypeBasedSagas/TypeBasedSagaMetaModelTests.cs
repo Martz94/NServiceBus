@@ -20,7 +20,7 @@
         }
 
         [Test]
-        public void FindUniquePropertiesByAttribute()
+        public void DetectUniquePropertiesByAttribute()
         {
             var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
 
@@ -29,12 +29,36 @@
 
             Assert.AreEqual("UniqueProperty",metadata.UniqueProperties.Single());
         }
+        [Test]
+        public void AutomaticallyAddUniqueForMappedProperties()
+        {
+            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySagaWithMappedProperty) });
+
+            var metadata = model.FindByEntityName(typeof(MySagaWithMappedPropertyData).FullName);
+
+
+            Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
+        }
 
 
         [Test]
         public void FilterOutNonSagaTypes()
         {
             Assert.AreEqual(1,TypeBasedSagaMetaModel.Create(new []{typeof(MySaga),typeof(string)}).All.Count());
+        }
+
+        class MySagaWithMappedProperty : Saga<MySagaWithMappedPropertyData>
+        {
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MySagaWithMappedPropertyData> mapper)
+            {
+                mapper.ConfigureMapping<SomeMessage>(m=>m.SomeProperty)
+                    .ToSaga(s=>s.UniqueProperty);
+            }
+        }
+
+        class MySagaWithMappedPropertyData : ContainSagaData
+        {
+            public int UniqueProperty { get; set; }
         }
 
         class MySaga:Saga<MyEntity>
@@ -50,5 +74,10 @@
             [Unique]
             public int UniqueProperty { get; set; }
         }
+    }
+
+    class SomeMessage
+    {
+        public int SomeProperty{ get; set; }
     }
 }
