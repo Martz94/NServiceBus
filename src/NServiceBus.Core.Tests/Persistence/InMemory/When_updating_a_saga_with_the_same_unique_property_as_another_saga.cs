@@ -1,30 +1,31 @@
 namespace NServiceBus.SagaPersisters.InMemory.Tests
 {
     using System;
-    using NServiceBus.Features;
-    using NServiceBus.InMemory.SagaPersister;
     using NUnit.Framework;
 
     [TestFixture]
-    public class When_updating_a_saga_with_the_same_unique_property_as_another_saga
+    class When_updating_a_saga_with_the_same_unique_property_as_another_saga:InMemorySagaPersistenceFixture
     {
-  
+        public When_updating_a_saga_with_the_same_unique_property_as_another_saga()
+        {
+            RegisterSaga<SagaWithUniqueProperty>();
+
+            RegisterSaga<SagaWithTwoUniqueProperties>();
+        }
         [Test]
         public void It_should_persist_successfully()
         {
             var saga1 = new SagaWithUniquePropertyData {Id = Guid.NewGuid(), UniqueString = "whatever1"};
             var saga2 = new SagaWithUniquePropertyData {Id = Guid.NewGuid(), UniqueString = "whatever"};
-  
-            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create<SagaWithUniqueProperty>());
               
-            inMemorySagaPersister.Save(saga1);
-            inMemorySagaPersister.Save(saga2);
+            persister.Save(saga1);
+            persister.Save(saga2);
 
             Assert.Throws<InvalidOperationException>(() => 
             {
-                var saga = inMemorySagaPersister.Get<SagaWithUniquePropertyData>(saga2.Id);
+                var saga = persister.Get<SagaWithUniquePropertyData>(saga2.Id);
                 saga.UniqueString = "whatever1";
-                inMemorySagaPersister.Update(saga);
+                persister.Update(saga);
             });
         }
 
@@ -33,16 +34,15 @@ namespace NServiceBus.SagaPersisters.InMemory.Tests
         {
             var saga1 = new SagaWithTwoUniquePropertiesData { Id = Guid.NewGuid(), UniqueString = "whatever1", UniqueInt = 5};
             var saga2 = new SagaWithTwoUniquePropertiesData { Id = Guid.NewGuid(), UniqueString = "whatever", UniqueInt = 37};
-            var inMemorySagaPersister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create<SagaWithTwoUniqueProperties>());
-  
-            inMemorySagaPersister.Save(saga1);
-            inMemorySagaPersister.Save(saga2);
+            
+            persister.Save(saga1);
+            persister.Save(saga2);
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                var saga = inMemorySagaPersister.Get<SagaWithTwoUniquePropertiesData>(saga2.Id);
+                var saga = persister.Get<SagaWithTwoUniquePropertiesData>(saga2.Id);
                 saga.UniqueInt = 5;
-                inMemorySagaPersister.Update(saga);
+                persister.Update(saga);
             });
         }
     }

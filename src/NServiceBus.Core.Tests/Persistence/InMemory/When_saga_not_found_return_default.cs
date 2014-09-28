@@ -1,15 +1,15 @@
 ﻿namespace NServiceBus.SagaPersisters.InMemory.Tests
 {
     using System;
-    using NServiceBus.Features;
-    using NServiceBus.InMemory.SagaPersister;
     using NUnit.Framework;
 
     [TestFixture]
-    class When_saga_not_found_return_default
+    class When_saga_not_found_return_default : InMemorySagaPersistenceFixture
     {
-        InMemorySagaPersister persister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create<SimpleSagaEntitySaga>());
-        
+        public When_saga_not_found_return_default()
+        {
+            RegisterSaga<SimpleSagaEntitySaga>();
+        }
         [Test]
         public void Should_return_default_when_using_finding_saga_with_property()
         {

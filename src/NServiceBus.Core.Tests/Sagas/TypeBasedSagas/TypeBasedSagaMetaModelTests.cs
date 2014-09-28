@@ -11,7 +11,7 @@
         [Test]
         public void FindSagasByEntityName()
         {
-            var model = TypeBasedSagaMetaModel.Create<MySaga>();
+            var model = TypeBasedSagaMetaModel.Create(new []{typeof(MySaga)});
 
             var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
 
@@ -22,7 +22,7 @@
         [Test]
         public void FindUniquePropertiesByAttribute()
         {
-            var model = TypeBasedSagaMetaModel.Create<MySaga>();
+            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
 
             var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
 
