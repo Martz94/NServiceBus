@@ -33,6 +33,7 @@
                 context.PhysicalMessage.Headers.Remove(Headers.SagaId);
                 context.PhysicalMessage.Headers.Remove(Headers.SagaType);
             }
+            var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
 
             var saga = context.MessageHandler.Instance as Saga.Saga;
             if (saga == null)
@@ -43,8 +44,7 @@
 
             currentContext = context;
 
-            var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
-
+      
             var sagaInstanceState = new ActiveSagaInstance(saga);
 
             //so that other behaviors can access the saga
