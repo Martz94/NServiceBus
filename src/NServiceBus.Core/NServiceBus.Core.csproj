@@ -179,6 +179,7 @@
     <Compile Include="Persistence\PersistenceStartup.cs" />
     <Compile Include="Persistence\Storage.cs" />
     <Compile Include="Pipeline\PipelineModifications.cs" />
+    <Compile Include="Sagas\AssociateMessageWithSagaBehavior.cs" />
     <Compile Include="Sagas\SagaConfigurationCache.cs" />
     <Compile Include="Sagas\TypeBasedSagaMetaModel.cs" />
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />

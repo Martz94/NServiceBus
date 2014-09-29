@@ -25,8 +25,6 @@
 
         public SagaConfigurationCache SagaConfigurationCache { get; set; }
 
-        public ISagaMetaModel SagaMetaModel { get; set; }
-
         public void Invoke(IncomingContext context, Action next)
         {
             // We need this for backwards compatibility because in v4.0.0 we still have this headers being sent as part of the message even if MessageIntent == MessageIntentEnum.Publish
@@ -45,7 +43,7 @@
 
             currentContext = context;
 
-            var sagaMetadata = SagaMetaModel.FindByName(saga.GetType().AssemblyQualifiedName);
+            var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
 
             var sagaInstanceState = new ActiveSagaInstance(saga);
 
@@ -306,9 +304,9 @@
 
         static ILog logger = LogManager.GetLogger<SagaPersistenceBehavior>();
 
-        public class SagaPersistenceRegistration : RegisterStep
+        public class Registration : RegisterStep
         {
-            public SagaPersistenceRegistration()
+            public Registration()
                 : base(WellKnownStep.InvokeSaga, typeof(SagaPersistenceBehavior), "Invokes the saga logic")
             {
                 InsertBefore(WellKnownStep.InvokeHandlers);

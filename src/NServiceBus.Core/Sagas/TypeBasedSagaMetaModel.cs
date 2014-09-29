@@ -72,6 +72,12 @@ namespace NServiceBus.Features
             return model.Values.Single(m => m.Name == name);
         }
 
+        public IEnumerable<SagaMetadata> FindByMessageType(string messageTypeId)
+        {
+            //todo
+            return model.Values;
+        }
+
         class SagaMapper : IConfigureHowToFindSagaWithMessage
         {
             public List<SagaToMessageMap> Mappings = new List<SagaToMessageMap>();
@@ -112,6 +118,7 @@ namespace NServiceBus.Features
 
         IEnumerable<SagaMetadata> All { get; }
         SagaMetadata FindByName(string name);
+        IEnumerable<SagaMetadata> FindByMessageType(string messageTypeId);
     }
 
     class SagaMetadata

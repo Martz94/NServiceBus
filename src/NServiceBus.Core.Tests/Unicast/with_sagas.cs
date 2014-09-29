@@ -33,7 +33,7 @@
 
         protected override void ApplyPipelineModifications()
         {
-            pipelineModifications.Additions.Add(new SagaPersistenceBehavior.SagaPersistenceRegistration());
+            pipelineModifications.Additions.Add(new SagaPersistenceBehavior.Registration());
         }
 
         protected void RegisterCustomFinder<T>() where T : IFinder

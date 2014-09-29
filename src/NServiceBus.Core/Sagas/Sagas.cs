@@ -40,7 +40,8 @@
         protected internal override void Setup(FeatureConfigurationContext context)
         {
             // Register the Saga related behavior for incoming messages
-            context.Pipeline.Register<SagaPersistenceBehavior.SagaPersistenceRegistration>();
+            context.Pipeline.Register<AssociateMessageWithSagaBehavior.Registration>();
+            context.Pipeline.Register<SagaPersistenceBehavior.Registration>();
 
             context.Container.RegisterSingleton(sagaConfigurationCache);
 
