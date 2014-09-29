@@ -12,14 +12,14 @@ namespace NServiceBus.Features
 
     class TypeBasedSagaMetaModel : ISagaMetaModel
     {
-        readonly Dictionary<string, SagaMetaData> model = new Dictionary<string, SagaMetaData>();
+        readonly Dictionary<string, SagaMetadata> model = new Dictionary<string, SagaMetadata>();
 
         public static ISagaMetaModel Create(IList<Type> availableTypes)
         {
             return new TypeBasedSagaMetaModel(availableTypes.Where(t => typeof(Saga).IsAssignableFrom(t) && t != typeof(Saga) && !t.IsGenericType)
                 .Select(GenerateModel).ToList());
         }
-        static SagaMetaData GenerateModel(Type sagaType)
+        static SagaMetadata GenerateModel(Type sagaType)
         {
             var sagaEntityType = sagaType.BaseType.GetGenericArguments().Single();
 
@@ -35,8 +35,9 @@ namespace NServiceBus.Features
                 uniquePropertiesOnEntity.Add(mapping.SagaPropName);
             }
 
-            return new SagaMetaData
+            return new SagaMetadata
             {
+                Name = sagaType.FullName,
                 EntityName = sagaEntityType.FullName,
                 UniqueProperties = uniquePropertiesOnEntity.Distinct()
             };
@@ -47,7 +48,7 @@ namespace NServiceBus.Features
             return UniqueAttribute.GetUniqueProperties(sagaEntityType).Select(pt => pt.Name);
         }
 
-        private TypeBasedSagaMetaModel(List<SagaMetaData> metadata)
+        private TypeBasedSagaMetaModel(List<SagaMetadata> metadata)
         {
             foreach (var sagaMetaData in metadata)
             {
@@ -55,14 +56,20 @@ namespace NServiceBus.Features
             }
         }
 
-        public SagaMetaData FindByEntityName(string name)
+        public SagaMetadata FindByEntityName(string name)
         {
             return model[name];
         }
 
-        public IEnumerable<SagaMetaData> All
+        public IEnumerable<SagaMetadata> All
         {
             get { return model.Values; }
+        }
+
+        public SagaMetadata FindByName(string name)
+        {
+            //todo - add a more efficient lookup
+            return model.Values.Single(m => m.Name == name);
         }
 
         class SagaMapper : IConfigureHowToFindSagaWithMessage
@@ -101,14 +108,16 @@ namespace NServiceBus.Features
 
     interface ISagaMetaModel
     {
-        SagaMetaData FindByEntityName(string name);
+        SagaMetadata FindByEntityName(string name);
 
-        IEnumerable<SagaMetaData> All { get; }
+        IEnumerable<SagaMetadata> All { get; }
+        SagaMetadata FindByName(string name);
     }
 
-    class SagaMetaData
+    class SagaMetadata
     {
         public IEnumerable<string> UniqueProperties;
         public string EntityName;
+        public string Name;
     }
 }

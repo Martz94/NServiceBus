@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Logging;
+    using NServiceBus.Features;
     using NServiceBus.Sagas;
     using NServiceBus.Sagas.Finders;
     using NServiceBus.Unicast;
@@ -24,6 +25,8 @@
 
         public SagaConfigurationCache SagaConfigurationCache { get; set; }
 
+        public ISagaMetaModel SagaMetaModel { get; set; }
+
         public void Invoke(IncomingContext context, Action next)
         {
             // We need this for backwards compatibility because in v4.0.0 we still have this headers being sent as part of the message even if MessageIntent == MessageIntentEnum.Publish
@@ -42,12 +45,14 @@
 
             currentContext = context;
 
+            var sagaMetadata = SagaMetaModel.FindByName(saga.GetType().AssemblyQualifiedName);
+
             var sagaInstanceState = new ActiveSagaInstance(saga);
 
             //so that other behaviors can access the saga
             context.Set(sagaInstanceState);
 
-            var loadedEntity = TryLoadSagaEntity(saga, context.IncomingLogicalMessage);
+            var loadedEntity = TryLoadSagaEntity(sagaMetadata, context.IncomingLogicalMessage);
 
             if (loadedEntity == null)
             {
@@ -209,11 +214,9 @@
             return true;
         }
 
-        IContainSagaData TryLoadSagaEntity(Saga.Saga saga, LogicalMessage message)
+        IContainSagaData TryLoadSagaEntity(SagaMetadata sagaMetadata, LogicalMessage message)
         {
-            var sagaType = saga.GetType();
-
-            var sagaEntityType = SagaConfigurationCache.GetSagaEntityTypeForSagaType(sagaType);
+            var sagaEntityType = Type.GetType(sagaMetadata.EntityName,true);
 
             var finders = GetFindersFor(message.MessageType, sagaEntityType);
 

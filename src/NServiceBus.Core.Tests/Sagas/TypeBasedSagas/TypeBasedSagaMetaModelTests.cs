@@ -9,6 +9,16 @@
     public class TypeBasedSagaMetaModelTests
     {
         [Test]
+        public void FindSagasByName()
+        {
+            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
+
+            var metadata = model.FindByName(typeof(MySaga).FullName);
+
+
+            Assert.NotNull(metadata);
+        }
+        [Test]
         public void FindSagasByEntityName()
         {
             var model = TypeBasedSagaMetaModel.Create(new []{typeof(MySaga)});
