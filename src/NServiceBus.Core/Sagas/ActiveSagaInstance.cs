@@ -15,6 +15,11 @@ namespace NServiceBus.Sagas
         }
 
         /// <summary>
+        /// The id of the saga
+        /// </summary>
+        public string SagaId { get; private set; }
+
+        /// <summary>
         /// The type of the saga
         /// </summary>
         public Type SagaType { get; private set; }
@@ -22,6 +27,7 @@ namespace NServiceBus.Sagas
         /// <summary>
         /// The actual saga instance
         /// </summary>
+        [ObsoleteEx(TreatAsErrorFromVersion = "5",RemoveInVersion = "6")]
         public Saga Instance { get; private set; }
         
         /// <summary>
@@ -52,6 +58,7 @@ namespace NServiceBus.Sagas
         void AttachEntity(IContainSagaData sagaEntity)
         {
             Instance.Entity = sagaEntity;
+            SagaId = sagaEntity.Id.ToString();
         }
         internal void MarkAsNotFound()
         {

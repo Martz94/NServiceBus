@@ -136,7 +136,7 @@
         void LogSaga(ActiveSagaInstance saga, IncomingContext context)
         {
 
-            var audit = string.Format("{0}:{1}", saga.SagaType.FullName, saga.Instance.Entity.Id);
+            var audit = string.Format("{0}:{1}", saga.SagaType.FullName, saga.SagaId);
 
             string header;
 

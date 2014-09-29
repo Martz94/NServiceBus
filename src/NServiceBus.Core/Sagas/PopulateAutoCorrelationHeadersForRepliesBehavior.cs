@@ -22,7 +22,7 @@
 
             if (context.TryGet(out saga) && !saga.NotFound)
             {
-                context.OutgoingLogicalMessage.Headers[Headers.OriginatingSagaId] = saga.Instance.Entity.Id.ToString();
+                context.OutgoingLogicalMessage.Headers[Headers.OriginatingSagaId] = saga.SagaId;
                 context.OutgoingLogicalMessage.Headers[Headers.OriginatingSagaType] = saga.SagaType.AssemblyQualifiedName;
             }
 
