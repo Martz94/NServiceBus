@@ -210,7 +210,7 @@
 
         IContainSagaData TryLoadSagaEntity(SagaMetadata sagaMetadata, LogicalMessage message)
         {
-            var sagaEntityType = Type.GetType(sagaMetadata.EntityName,true);
+            var sagaEntityType = (Type)sagaMetadata.Properties["entity-clr-type"];
 
             var finders = GetFindersFor(message.MessageType, sagaEntityType);
 

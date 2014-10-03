@@ -35,12 +35,16 @@ namespace NServiceBus.Features
                 uniquePropertiesOnEntity.Add(mapping.SagaPropName);
             }
 
-            return new SagaMetadata
+            var metadata = new SagaMetadata
             {
                 Name = sagaType.FullName,
                 EntityName = sagaEntityType.FullName,
                 UniqueProperties = uniquePropertiesOnEntity.Distinct()
             };
+
+            metadata.Properties.Add("entity-clr-type",sagaEntityType);
+
+            return metadata;
         }
 
         static IEnumerable<string> FindUniqueAttributes(Type sagaEntityType)
@@ -122,9 +126,15 @@ namespace NServiceBus.Features
     }
 
     class SagaMetadata
-    {
+    { 
+        public SagaMetadata()
+        {
+            Properties = new Dictionary<string, object>();
+            UniqueProperties = new List<string>();
+        }
         public IEnumerable<string> UniqueProperties;
-        public string EntityName;
         public string Name;
+        public Dictionary<string, object> Properties;
+        public string EntityName;
     }
 }
