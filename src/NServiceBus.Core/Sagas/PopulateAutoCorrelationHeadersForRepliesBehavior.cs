@@ -23,7 +23,7 @@
             if (context.TryGet(out saga) && !saga.NotFound)
             {
                 context.OutgoingLogicalMessage.Headers[Headers.OriginatingSagaId] = saga.SagaId;
-                context.OutgoingLogicalMessage.Headers[Headers.OriginatingSagaType] = saga.SagaType.AssemblyQualifiedName;
+                context.OutgoingLogicalMessage.Headers[Headers.OriginatingSagaType] = ((Type)saga.Metadata.Properties["saga-clr-type"]).AssemblyQualifiedName;
             }
 
             //auto correlate with the saga we are replying to if needed

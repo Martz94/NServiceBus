@@ -41,6 +41,17 @@
         }
 
         [Test]
+        public void GetSagaClrType()
+        {
+            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
+
+            var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
+
+
+            Assert.AreEqual(typeof(MySaga), metadata.Properties["saga-clr-type"]);
+        }
+
+        [Test]
         public void DetectUniquePropertiesByAttribute()
         {
             var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });

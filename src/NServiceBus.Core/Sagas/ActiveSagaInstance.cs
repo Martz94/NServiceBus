@@ -1,6 +1,7 @@
 namespace NServiceBus.Sagas
 {
     using System;
+    using NServiceBus.Features;
     using Saga;
 
     /// <summary>
@@ -8,10 +9,10 @@ namespace NServiceBus.Sagas
     /// </summary>
     public class ActiveSagaInstance
     {
-        internal ActiveSagaInstance(Saga saga)
+        internal ActiveSagaInstance(Saga saga,SagaMetadata metadata)
         {
             Instance = saga;
-            SagaType = saga.GetType();
+            Metadata = metadata;
         }
 
         /// <summary>
@@ -22,7 +23,19 @@ namespace NServiceBus.Sagas
         /// <summary>
         /// The type of the saga
         /// </summary>
-        public Type SagaType { get; private set; }
+        [ObsoleteEx(TreatAsErrorFromVersion = "5", RemoveInVersion = "6",Replacement = ".Metadata.Properties[\"saga-clr-type\"]")]
+        public Type SagaType 
+        {
+            get
+            {
+                return (Type)Metadata.Properties["saga-clr-type"];
+            }
+        }
+
+        /// <summary>
+        /// Metadata for this active saga
+        /// </summary>
+        public SagaMetadata Metadata { get; private set; }
         
         /// <summary>
         /// The actual saga instance

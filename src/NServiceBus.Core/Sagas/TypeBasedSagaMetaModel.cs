@@ -43,6 +43,7 @@ namespace NServiceBus.Features
             };
 
             metadata.Properties.Add("entity-clr-type",sagaEntityType);
+            metadata.Properties.Add("saga-clr-type", sagaType);
 
             return metadata;
         }
@@ -125,16 +126,35 @@ namespace NServiceBus.Features
         IEnumerable<SagaMetadata> FindByMessageType(string messageTypeId);
     }
 
-    class SagaMetadata
+    /// <summary>
+    /// Contains metadata for known sagas
+    /// </summary>
+    public class SagaMetadata
     { 
-        public SagaMetadata()
+        internal SagaMetadata()
         {
             Properties = new Dictionary<string, object>();
             UniqueProperties = new List<string>();
         }
+
+        /// <summary>
+        /// Unique properties for this saga
+        /// </summary>
         public IEnumerable<string> UniqueProperties;
+
+        /// <summary>
+        /// The name of the saga
+        /// </summary>
         public string Name;
+
+        /// <summary>
+        /// List of related properties
+        /// </summary>
         public Dictionary<string, object> Properties;
+
+        /// <summary>
+        /// The name of the saga data entity
+        /// </summary>
         public string EntityName;
     }
 }

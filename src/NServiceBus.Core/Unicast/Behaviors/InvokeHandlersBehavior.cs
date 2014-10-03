@@ -11,7 +11,8 @@
         {
             ActiveSagaInstance saga;
 
-            if (context.TryGet(out saga) && saga.NotFound && saga.SagaType == context.MessageHandler.Instance.GetType())
+            //todo, stop using the Instance
+            if (context.TryGet(out saga) && saga.NotFound && saga.Instance == context.MessageHandler.Instance)
             {
                 next();
                 return;

@@ -41,7 +41,7 @@
             currentContext = context;
 
       
-            var sagaInstanceState = new ActiveSagaInstance(saga);
+            var sagaInstanceState = new ActiveSagaInstance(saga,sagaMetadata);
 
             //so that other behaviors can access the saga
             context.Set(sagaInstanceState);
@@ -50,8 +50,11 @@
 
             if (loadedEntity == null)
             {
+                //todo - refactor to use the saga name instead
+                var sagaType = (Type)sagaMetadata.Properties["saga-clr-type"];
+
                 //if this message are not allowed to start the saga
-                if (IsAllowedToStartANewSaga(context, sagaInstanceState))
+                if (!SagaConfigurationCache.IsAStartSagaMessage(sagaType, context.IncomingLogicalMessage.MessageType))
                 {
                     sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaInstanceState.SagaType));
                 }
@@ -59,7 +62,11 @@
                 {
                     sagaInstanceState.MarkAsNotFound();
 
-                    InvokeSagaNotFoundHandlers(sagaInstanceState.SagaType);
+                    InvokeSagaNotFoundHandlers(sagaType);
+                }
+                else
+                {
+                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaType));
                 }
             }
             else
@@ -94,7 +101,7 @@
                     NotifyTimeoutManagerThatSagaHasCompleted(saga);
                 }
 
-                logger.Debug(string.Format("Saga: '{0}' with Id: '{1}' has completed.", sagaInstanceState.SagaType.FullName, saga.Entity.Id));
+                logger.DebugFormat("Saga: '{0}' with Id: '{1}' has completed.", sagaInstanceState.Metadata.Name, saga.Entity.Id);
             }
             else
             {
@@ -132,7 +139,7 @@
         void LogSaga(ActiveSagaInstance saga, IncomingContext context)
         {
 
-            var audit = string.Format("{0}:{1}", saga.SagaType.FullName, saga.SagaId);
+            var audit = string.Format("{0}:{1}", saga.Metadata.Name, saga.SagaId);
 
             string header;
 
