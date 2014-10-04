@@ -85,17 +85,6 @@ namespace NServiceBus.Sagas
             return findersWithExactMatch.Concat(findersMatchingBaseTypes);
         }
 
-        /// <summary>
-        ///     Returns the entity type configured for the given saga type.
-        /// </summary>
-        public Type GetSagaEntityTypeForSagaType(Type sagaType)
-        {
-            Type result;
-            SagaTypeToSagaEntityTypeLookup.TryGetValue(sagaType, out result);
-
-            return result;
-        }
-
         public readonly Dictionary<Type, Dictionary<Type, SagaToMessageMap>> SagaEntityToMessageToPropertyLookup = new Dictionary<Type, Dictionary<Type, SagaToMessageMap>>();
         public readonly Dictionary<Type, Dictionary<Type, MethodInfo>> FinderTypeToMessageToMethodInfoLookup = new Dictionary<Type, Dictionary<Type, MethodInfo>>();
         public readonly Dictionary<Type, List<Type>> MessageTypeToSagaTypesLookup = new Dictionary<Type, List<Type>>();

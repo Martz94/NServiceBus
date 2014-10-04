@@ -56,7 +56,7 @@
                 //if this message are not allowed to start the saga
                 if (sagaMetadata.IsMessageAllowedToStartTheSaga(context.IncomingLogicalMessage.MessageType.FullName))
                 {
-                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaType));
+                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaMetadata));
                 }
                 else
                 {
@@ -271,17 +271,13 @@
             return new List<IFinder> { currentContext.Builder.Build(typeof(HeaderSagaIdFinder<>).MakeGenericType(sagaEntityType)) as IFinder };
         }
 
-        IContainSagaData CreateNewSagaEntity(Type sagaType)
+        IContainSagaData CreateNewSagaEntity(SagaMetadata metadata)
         {
-            var sagaEntityType = SagaConfigurationCache.GetSagaEntityTypeForSagaType(sagaType);
-
-            if (sagaEntityType == null)
-            {
-                throw new InvalidOperationException("No saga entity type could be found for saga: " + sagaType);
-            }
+            var sagaEntityType = (Type)metadata.Properties["entity-clr-type"];
 
             var sagaEntity = (IContainSagaData)Activator.CreateInstance(sagaEntityType);
 
+            //todo -make pluggable
             sagaEntity.Id = CombGuid.Generate();
 
             TransportMessage physicalMessage;
