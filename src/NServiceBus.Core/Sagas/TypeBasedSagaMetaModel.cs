@@ -35,11 +35,14 @@ namespace NServiceBus.Features
                 uniquePropertiesOnEntity.Add(mapping.SagaPropName);
             }
 
-            var metadata = new SagaMetadata
+            var associatedMessages = GetAssociatedMessages(sagaType,new Conventions());
+
+            var metadata = new SagaMetadata(associatedMessages)
             {
                 Name = sagaType.FullName,
                 EntityName = sagaEntityType.FullName,
-                UniqueProperties = uniquePropertiesOnEntity.Distinct()
+                UniqueProperties = uniquePropertiesOnEntity.Distinct(),
+                
             };
 
             metadata.Properties.Add("entity-clr-type",sagaEntityType);
@@ -48,12 +51,53 @@ namespace NServiceBus.Features
             return metadata;
         }
 
+        static IEnumerable<SagaMessage> GetAssociatedMessages(Type sagaType,Conventions conventions)
+        {
+            var result =  GetMessagesCorrespondingToFilterOnSaga(sagaType, typeof(IAmStartedByMessages<>), conventions)
+                .Select(t=>new SagaMessage(t.FullName,true)).ToList();
+
+            foreach (var messageType in GetMessagesCorrespondingToFilterOnSaga(sagaType, typeof(IHandleMessages<>), conventions))
+            {
+                if (result.Any(m=>m.MessageType == messageType.FullName))
+                {
+                    continue;
+                }
+                result.Add(new SagaMessage(messageType.FullName,false));
+            }
+
+            return result;
+        }
+
+        static IEnumerable<Type> GetMessagesCorrespondingToFilterOnSaga(Type sagaType, Type filter, Conventions conventions)
+        {
+            foreach (var interfaceType in sagaType.GetInterfaces())
+            {
+                foreach (var argument in interfaceType.GetGenericArguments())
+                {
+                    var genericType = filter.MakeGenericType(argument);
+                    var isOfFilterType = genericType == interfaceType;
+                    if (!isOfFilterType)
+                    {
+                        continue;
+                    }
+                    if (conventions.IsMessageType(argument))
+                    {
+                        yield return argument;
+                        continue;
+                    }
+                    var message = string.Format("The saga '{0}' implements '{1}' but the message type '{2}' is not classified as a message. You should either use 'Unobtrusive Mode Messages' or the message should implement either 'IMessage', 'IEvent' or 'ICommand'.", sagaType.FullName, genericType.Name, argument.FullName);
+                    throw new Exception(message);
+                }
+            }
+        }
+
         static IEnumerable<string> FindUniqueAttributes(Type sagaEntityType)
         {
             return UniqueAttribute.GetUniqueProperties(sagaEntityType).Select(pt => pt.Name);
         }
 
         private TypeBasedSagaMetaModel(List<SagaMetadata> metadata)
+
         {
             foreach (var sagaMetaData in metadata)
             {
@@ -131,12 +175,20 @@ namespace NServiceBus.Features
     /// </summary>
     public class SagaMetadata
     { 
-        internal SagaMetadata()
+        internal SagaMetadata(IEnumerable<SagaMessage> messages)
         {
             Properties = new Dictionary<string, object>();
             UniqueProperties = new List<string>();
+
+            associatedMessages = new Dictionary<string, SagaMessage>();
+
+            foreach (var sagaMessage in messages)
+            {
+                associatedMessages[sagaMessage.MessageType] = sagaMessage;
+            }
         }
 
+        Dictionary<string, SagaMessage> associatedMessages;
         /// <summary>
         /// Unique properties for this saga
         /// </summary>
@@ -156,5 +208,51 @@ namespace NServiceBus.Features
         /// The name of the saga data entity
         /// </summary>
         public string EntityName;
+
+        /// <summary>
+        /// True if the specified message type is allowed to start the saga
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <returns></returns>
+        public bool IsMessageAllowedToStartTheSaga(string messageType)
+        {
+            SagaMessage sagaMessage;
+
+            if (!associatedMessages.TryGetValue(messageType, out sagaMessage))
+            {
+                return false;
+            }
+            return sagaMessage.IsAllowedToStartSaga;
+        }
+
+        /// <summary>
+        /// Returns the list of messages that is associated with this saga
+        /// </summary>
+        public IEnumerable<SagaMessage> AssociatedMessages
+        {
+            get { return associatedMessages.Values; }
+        }
+    }
+
+    /// <summary>
+    /// Representation of a message that is related to a saga
+    /// </summary>
+    public class SagaMessage
+    {
+        /// <summary>
+        /// True if the message can start the saga
+        /// </summary>
+        public readonly bool IsAllowedToStartSaga;
+
+        /// <summary>
+        /// The type of the message
+        /// </summary>
+        public readonly string MessageType;
+
+        internal SagaMessage(string messageType, bool isAllowedToStart)
+        {
+            MessageType = messageType;
+            IsAllowedToStartSaga = isAllowedToStart;
+        }
     }
 }

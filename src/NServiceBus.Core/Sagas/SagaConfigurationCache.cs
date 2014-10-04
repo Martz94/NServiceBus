@@ -96,27 +96,6 @@ namespace NServiceBus.Sagas
             return result;
         }
 
-        /// <summary>
-        ///     True if the given message are configure to start the saga
-        /// </summary>
-        public bool IsAStartSagaMessage(Type sagaType, Type messageType)
-        {
-            List<Type> messageTypes;
-            SagaTypeToMessageTypesRequiringSagaStartLookup.TryGetValue(sagaType, out messageTypes);
-
-            if (messageTypes == null)
-            {
-                return false;
-            }
-
-            if (messageTypes.Contains(messageType))
-            {
-                return true;
-            }
-
-            return messageTypes.Any(msgTypeHandleBySaga => msgTypeHandleBySaga.IsAssignableFrom(messageType));
-        }
-
         public readonly Dictionary<Type, Dictionary<Type, SagaToMessageMap>> SagaEntityToMessageToPropertyLookup = new Dictionary<Type, Dictionary<Type, SagaToMessageMap>>();
         public readonly Dictionary<Type, Dictionary<Type, MethodInfo>> FinderTypeToMessageToMethodInfoLookup = new Dictionary<Type, Dictionary<Type, MethodInfo>>();
         public readonly Dictionary<Type, List<Type>> MessageTypeToSagaTypesLookup = new Dictionary<Type, List<Type>>();

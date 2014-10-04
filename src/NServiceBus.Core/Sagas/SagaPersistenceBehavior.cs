@@ -27,7 +27,7 @@
 
         public void Invoke(IncomingContext context, Action next)
         {
-          
+
             //todo - foreach
             var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
 
@@ -40,8 +40,8 @@
 
             currentContext = context;
 
-      
-            var sagaInstanceState = new ActiveSagaInstance(saga,sagaMetadata);
+
+            var sagaInstanceState = new ActiveSagaInstance(saga, sagaMetadata);
 
             //so that other behaviors can access the saga
             context.Set(sagaInstanceState);
@@ -54,19 +54,15 @@
                 var sagaType = (Type)sagaMetadata.Properties["saga-clr-type"];
 
                 //if this message are not allowed to start the saga
-                if (!SagaConfigurationCache.IsAStartSagaMessage(sagaType, context.IncomingLogicalMessage.MessageType))
+                if (sagaMetadata.IsMessageAllowedToStartTheSaga(context.IncomingLogicalMessage.MessageType.FullName))
                 {
-                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaInstanceState.SagaType));
+                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaType));
                 }
                 else
                 {
                     sagaInstanceState.MarkAsNotFound();
 
                     InvokeSagaNotFoundHandlers(sagaType);
-                }
-                else
-                {
-                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaType));
                 }
             }
             else
