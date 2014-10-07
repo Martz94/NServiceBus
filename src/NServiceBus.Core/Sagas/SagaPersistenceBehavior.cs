@@ -5,6 +5,7 @@
     using System.Linq;
     using Logging;
     using NServiceBus.Features;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Sagas;
     using NServiceBus.Sagas.Finders;
     using NServiceBus.Unicast;
@@ -56,7 +57,7 @@
                 //if this message are not allowed to start the saga
                 if (sagaMetadata.IsMessageAllowedToStartTheSaga(context.IncomingLogicalMessage.MessageType.FullName))
                 {
-                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaMetadata));
+                    sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaMetadata, context.IncomingLogicalMessage));
                 }
                 else
                 {
@@ -211,23 +212,31 @@
             return true;
         }
 
-        IContainSagaData TryLoadSagaEntity(SagaMetadata sagaMetadata, LogicalMessage message)
+        IContainSagaData TryLoadSagaEntity(SagaMetadata metadata, LogicalMessage message)
         {
-            var sagaEntityType = (Type)sagaMetadata.Properties["entity-clr-type"];
 
-            var finders = GetFindersFor(message.MessageType, sagaEntityType);
+            var sagaEntityType = (Type)metadata.Properties["entity-clr-type"];
 
-            foreach (var finder in finders)
+            string sagaId;
+
+            //todo - we should check saga type as well, add failing test first
+            if (message.Headers.TryGetValue(Headers.SagaId, out sagaId) && !string.IsNullOrEmpty(sagaId))
             {
-                var sagaEntity = UseFinderToFindSaga(finder, message.Instance);
+                //since we have a saga id available we can now shortcut the finders and just load the saga
+                var loaderType = typeof(LoadSagaByIdWrapper<>).MakeGenericType(sagaEntityType);
 
-                if (sagaEntity != null)
-                {
-                    return sagaEntity;
-                }
+                var loader = (SagaLoader)Activator.CreateInstance(loaderType);
+
+                return loader.Load(SagaPersister, sagaId);
             }
 
-            return null;
+            var finderDefinition = metadata.GetFinder(message.MessageType.FullName);
+
+            var finderType = finderDefinition.Type;
+
+            var finder = currentContext.Builder.Build(finderType);
+
+            return ((SagaFinder)finder).Find(currentContext.Builder, finderDefinition, message);
         }
 
         void NotifyTimeoutManagerThatSagaHasCompleted(Saga.Saga saga)
@@ -235,43 +244,7 @@
             MessageDeferrer.ClearDeferredMessages(Headers.SagaId, saga.Entity.Id.ToString());
         }
 
-        IContainSagaData UseFinderToFindSaga(IFinder finder, object message)
-        {
-            var method = SagaConfigurationCache.GetFindByMethodForFinder(finder, message);
-
-            if (method != null)
-            {
-                return method.Invoke(finder, new[] { message }) as IContainSagaData;
-            }
-
-            return null;
-        }
-
-        IEnumerable<IFinder> GetFindersFor(Type messageType, Type sagaEntityType)
-        {
-            string sagaId;
-
-
-            currentContext.IncomingLogicalMessage.Headers.TryGetValue(Headers.SagaId, out sagaId);
-
-            if (sagaEntityType == null || string.IsNullOrEmpty(sagaId))
-            {
-                var finders = SagaConfigurationCache.GetFindersForMessageAndEntity(messageType, sagaEntityType).Select(t => currentContext.Builder.Build(t) as IFinder).ToList();
-
-                if (logger.IsDebugEnabled)
-                {
-                    logger.DebugFormat("The following finders:{0} was allocated to message of type {1}", string.Join(";", finders.Select(t => t.GetType().Name)), messageType);
-                }
-
-                return finders;
-            }
-
-            logger.DebugFormat("Message contains a saga type and saga id. Going to use the saga id finder. Type:{0}, Id:{1}", sagaEntityType, sagaId);
-
-            return new List<IFinder> { currentContext.Builder.Build(typeof(HeaderSagaIdFinder<>).MakeGenericType(sagaEntityType)) as IFinder };
-        }
-
-        IContainSagaData CreateNewSagaEntity(SagaMetadata metadata)
+        IContainSagaData CreateNewSagaEntity(SagaMetadata metadata,LogicalMessage message)
         {
             var sagaEntityType = (Type)metadata.Properties["entity-clr-type"];
 
@@ -279,17 +252,13 @@
 
             //todo -make pluggable
             sagaEntity.Id = CombGuid.Generate();
+            sagaEntity.OriginalMessageId = message.Headers[Headers.MessageId];
 
-            TransportMessage physicalMessage;
+            string replyToAddress;
 
-            if (currentContext.TryGet(IncomingContext.IncomingPhysicalMessageKey, out physicalMessage))
+            if (message.Headers.TryGetValue(Headers.ReplyToAddress, out replyToAddress))
             {
-                sagaEntity.OriginalMessageId = physicalMessage.Id;
-
-                if (physicalMessage.ReplyToAddress != null)
-                {
-                    sagaEntity.Originator = physicalMessage.ReplyToAddress.ToString();
-                }
+                sagaEntity.Originator = replyToAddress;
             }
 
             return sagaEntity;
@@ -308,5 +277,10 @@
                 InsertAfter("SetCurrentMessageBeingHandled");
             }
         }
+    }
+
+    abstract class SagaFinder
+    {
+        internal abstract IContainSagaData Find(IBuilder builder,SagaFinderDefinition finderDefinition, LogicalMessage message);
     }
 }

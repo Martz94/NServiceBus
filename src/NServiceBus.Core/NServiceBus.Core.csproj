@@ -180,6 +180,8 @@
     <Compile Include="Persistence\Storage.cs" />
     <Compile Include="Pipeline\PipelineModifications.cs" />
     <Compile Include="Sagas\AssociateMessageWithSagaBehavior.cs" />
+    <Compile Include="Sagas\Finders\CustomFinderAdapter.cs" />
+    <Compile Include="Sagas\LoadSagaByIdWrapper.cs" />
     <Compile Include="Sagas\SagaConfigurationCache.cs" />
     <Compile Include="Sagas\TypeBasedSagaMetaModel.cs" />
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />
@@ -463,7 +465,6 @@
     </Compile>
     <Compile Include="Persistence\InMemory\SagaPersister\InMemorySagaPersister.cs" />
     <Compile Include="Sagas\ConfigureHowToFindSagaWithMessageDispatcher.cs" />
-    <Compile Include="Sagas\Finders\HeaderSagaIdFinder.cs" />
     <Compile Include="Sagas\Finders\PropertySagaFinder.cs" />
     <Compile Include="Satellites\Config\SatelliteContext.cs" />
     <Compile Include="Satellites\ISatellite.cs" />

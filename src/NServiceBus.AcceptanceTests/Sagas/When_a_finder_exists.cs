@@ -1,6 +1,5 @@
 ﻿namespace NServiceBus.AcceptanceTests.Sagas
 {
-    using System;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Saga;

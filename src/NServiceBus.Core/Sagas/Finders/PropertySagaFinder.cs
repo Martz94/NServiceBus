@@ -1,41 +1,36 @@
 namespace NServiceBus.Sagas.Finders
 {
     using System;
+    using NServiceBus.Features;
+    using NServiceBus.ObjectBuilder;
+    using NServiceBus.Unicast.Messages;
     using Saga;
 
     /// <summary>
     /// Finds the given type of saga by looking it up based on the given property.
     /// </summary>
-    class PropertySagaFinder<TSagaData, TMessage> : IFindSagas<TSagaData>.Using<TMessage>
-        where TSagaData : IContainSagaData
+    class PropertySagaFinder<TSagaData> : SagaFinder where TSagaData : IContainSagaData
     {
-        /// <summary>
-        /// Injected persister
-        /// </summary>
-        public ISagaPersister SagaPersister { get; set; }
+        readonly ISagaPersister sagaPersister;
 
-        /// <summary>
-        /// Property of the saga that will be used for lookup.
-        /// </summary>
-        public SagaToMessageMap SagaToMessageMap { get; set; }
-        
-        /// <summary>
-        /// Uses the saga persister to find the saga.
-        /// </summary>
-        public TSagaData FindBy(TMessage message)
+        public PropertySagaFinder(ISagaPersister sagaPersister)
         {
-            if (SagaPersister == null)
+            this.sagaPersister = sagaPersister;
+        }
+
+        internal override IContainSagaData Find(IBuilder builder,SagaFinderDefinition finderDefinition, LogicalMessage message)
+        {
+            var propertyAccessor = (Func<object,object>)finderDefinition.Properties["property-accessor"];
+            var propertyValue = propertyAccessor(message.Instance);
+
+            var sagaPropertyName = (string)finderDefinition.Properties["saga-property-name"];
+
+            if (sagaPropertyName.ToLower() == "id")
             {
-                throw new InvalidOperationException("No saga persister configured. Please configure a saga persister if you want to use the nservicebus saga support");
-            }
-            
-            var propertyValue = SagaToMessageMap.MessageProp(message);
-            if (SagaToMessageMap.SagaPropName.ToLower() == "id")
-            {
-                return SagaPersister.Get<TSagaData>((Guid)propertyValue);
+                return sagaPersister.Get<TSagaData>((Guid)propertyValue);
             }
 
-            return SagaPersister.Get<TSagaData>(SagaToMessageMap.SagaPropName, propertyValue);
+            return sagaPersister.Get<TSagaData>(sagaPropertyName, propertyValue);
         }
     }
 }

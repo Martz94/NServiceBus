@@ -86,23 +86,11 @@
                     CreatePropertyFinder(context, sagaEntityPair.Key, messageType, sagaToMessageMap);
                 }
             }
-
-            foreach (var sagaEntityType in sagaConfigurationCache.SagaTypeToSagaEntityTypeLookup.Values)
-            {
-                var sagaHeaderIdFinder = typeof(HeaderSagaIdFinder<>).MakeGenericType(sagaEntityType);
-                context.Container.ConfigureComponent(sagaHeaderIdFinder, DependencyLifecycle.InstancePerCall);
-                ConfigureFinder(sagaHeaderIdFinder, conventions);
-            }
         }
 
         void CreatePropertyFinder(FeatureConfigurationContext context, Type sagaEntityType, Type messageType, SagaToMessageMap sagaToMessageMap)
         {
-            var finderType = typeof(PropertySagaFinder<,>).MakeGenericType(sagaEntityType, messageType);
 
-            context.Container.ConfigureComponent(finderType, DependencyLifecycle.InstancePerCall)
-                .ConfigureProperty("SagaToMessageMap", sagaToMessageMap);
-
-            ConfigureFinder(finderType, conventions);
         }
 
         // Made internal for testing purposes
@@ -121,7 +109,7 @@
             var prop = t.GetProperty("Data");
             MapSagaTypeToSagaEntityType(t, prop.PropertyType);
 
-            var saga = (Saga) FormatterServices.GetUninitializedObject(t);
+            var saga = (Saga)FormatterServices.GetUninitializedObject(t);
             saga.ConfigureHowToFindSaga(sagaMessageFindingConfiguration);
         }
 
@@ -181,7 +169,7 @@
                 methods[messageType] = method;
             }
         }
-        
+
         void MapMessageTypeToSagaType(Type messageType, Type sagaType)
         {
             List<Type> sagas;

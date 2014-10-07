@@ -72,6 +72,7 @@
 
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
         }
+     
         [Test]
         public void DetectMessagesStartingTheSaga()
         {
@@ -90,6 +91,11 @@
             Assert.False(metadata.IsMessageAllowedToStartTheSaga(typeof(SagaWith2StartersAnd1Handler.Message3).FullName));
         }
 
+        [Test]
+        public void DetectAndRegisterFinders()
+        {
+            
+        }
 
         [Test]
         public void FilterOutNonSagaTypes()

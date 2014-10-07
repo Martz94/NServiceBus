@@ -43,39 +43,6 @@
 
         protected void RegisterSaga<T>(object sagaEntity = null) where T : new()
         {
-            var sagaEntityType = GetSagaEntityType<T>();
-
-            var sagaHeaderIdFinder = typeof(HeaderSagaIdFinder<>).MakeGenericType(sagaEntityType);
-            FuncBuilder.Register(sagaHeaderIdFinder);
-
-            sagas.ConfigureSaga(typeof(T), conventions);
-            sagas.ConfigureFinder(sagaHeaderIdFinder, conventions);
-
-            if (sagas.sagaConfigurationCache.SagaEntityToMessageToPropertyLookup.ContainsKey(sagaEntityType))
-            {
-                foreach (var entityLookups in sagas.sagaConfigurationCache.SagaEntityToMessageToPropertyLookup[sagaEntityType])
-                {
-                    var propertyFinder = typeof(PropertySagaFinder<,>).MakeGenericType(sagaEntityType, entityLookups.Key);
-
-                    sagas.ConfigureFinder(propertyFinder, conventions);
-
-                    var propertyLookups = entityLookups.Value;
-
-                    var finder = Activator.CreateInstance(propertyFinder);
-                    propertyFinder.GetProperty("SagaToMessageMap").SetValue(finder, propertyLookups);
-                    FuncBuilder.Register(propertyFinder, () => finder);
-                }
-            }
-
-            if (sagaEntity != null)
-            {
-                var se = (IContainSagaData)sagaEntity;
-
-                persister.CurrentSagaEntities[se.Id] = new InMemorySagaPersister.VersionedSagaEntity { SagaEntity = se };
-            }
-
-            RegisterMessageHandlerType<T>();
-
         }
 
         static Type GetSagaEntityType<T>() where T : new()

@@ -232,6 +232,39 @@ namespace NServiceBus.Features
         {
             get { return associatedMessages.Values; }
         }
+
+      
+        /// <summary>
+        /// Gets the configured finder for this message
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <returns></returns>
+        public SagaFinderDefinition GetFinder(string messageType)
+        {
+            throw new NotImplementedException();
+        }
+
+    }
+
+    /// <summary>
+    /// Defines a message finder
+    /// </summary>
+    public class SagaFinderDefinition   
+    {
+        internal SagaFinderDefinition()
+        {
+            Properties = new Dictionary<string, object>();
+        }
+
+        /// <summary>
+        /// Custom properties
+        /// </summary>
+        public Dictionary<string, object> Properties;
+        
+        /// <summary>
+        /// The type of the finder
+        /// </summary>
+        public Type Type { get; set; }
     }
 
     /// <summary>
