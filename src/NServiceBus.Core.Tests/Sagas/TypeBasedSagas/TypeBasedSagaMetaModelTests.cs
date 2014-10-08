@@ -62,6 +62,7 @@
 
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
         }
+     
         [Test]
         public void AutomaticallyAddUniqueForMappedProperties()
         {
@@ -71,6 +72,15 @@
 
 
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
+        }
+
+        [Test]
+        public void RequireFinderForMessagesStartingTheSaga()
+        {
+            var ex = Assert.Throws<Exception>( ()=>TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty)));
+
+
+            Assert.True(ex.Message.Contains(typeof(MessageThatStartsTheSaga).FullName));
         }
      
         [Test]
@@ -163,9 +173,49 @@
             [Unique]
             public int UniqueProperty { get; set; }
         }
+
+        class MySagaWithUnmappedStartProperty : Saga<MySagaWithUnmappedStartProperty.SagaData>,
+            IAmStartedByMessages<MessageThatStartsTheSaga>,
+            IHandleMessages<MessageThatDoesntStartTheSaga>
+        {
+            
+
+            public class SagaData : ContainSagaData
+            {
+                
+            }
+
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
+            {
+                
+
+            }
+
+            public void Handle(MessageThatStartsTheSaga message)
+            {
+                
+
+            }
+
+            public void Handle(MessageThatDoesntStartTheSaga message)
+            {
+                
+            }
+        }
     }
 
     class SomeMessage
+    {
+        public int SomeProperty { get; set; }
+    }
+
+    class MessageThatDoesntStartTheSaga
+    {
+        public int SomeProperty { get; set; }
+    }
+
+
+    class MessageThatStartsTheSaga
     {
         public int SomeProperty { get; set; }
     }

@@ -16,9 +16,25 @@ namespace NServiceBus.Features
 
         public static ISagaMetaModel Create(IList<Type> availableTypes)
         {
-            return new TypeBasedSagaMetaModel(availableTypes.Where(t => typeof(Saga).IsAssignableFrom(t) && t != typeof(Saga) && !t.IsGenericType)
+            return new TypeBasedSagaMetaModel(availableTypes.Where(IsSagaType)
                 .Select(GenerateModel).ToList());
         }
+
+        static bool IsSagaType(Type t)
+        {
+            return typeof(Saga).IsAssignableFrom(t) && t != typeof(Saga) && !t.IsGenericType;
+        }
+
+        public static SagaMetadata Create(Type sagaType)
+        {
+            if (!IsSagaType(sagaType))
+            {
+                throw new Exception(sagaType.FullName + " is not a saga");
+            }
+
+            return GenerateModel(sagaType);
+        }
+    
         static SagaMetadata GenerateModel(Type sagaType)
         {
             var sagaEntityType = sagaType.BaseType.GetGenericArguments().Single();
@@ -30,12 +46,29 @@ namespace NServiceBus.Features
             var saga = (Saga)FormatterServices.GetUninitializedObject(sagaType);
             saga.ConfigureHowToFindSaga(mapper);
 
+            var finders = new List<SagaFinderDefinition>();
+
             foreach (var mapping in mapper.Mappings)
             {
                 uniquePropertiesOnEntity.Add(mapping.SagaPropName);
             }
 
             var associatedMessages = GetAssociatedMessages(sagaType,new Conventions());
+
+            foreach (var associatedMessage in associatedMessages)
+            {
+                if (!associatedMessage.IsAllowedToStartSaga)
+                {
+                    continue;
+                }
+
+                var finder = finders.SingleOrDefault(f => f.MessageType == associatedMessage.MessageType);
+
+                if (finder == null)
+                {
+                    throw new Exception(string.Format("All messages starting a saga needs to have a configured finder. Please add a mapping for message: '{0}'",associatedMessage.MessageType));
+                }
+            }
 
             var metadata = new SagaMetadata(associatedMessages)
             {
@@ -265,6 +298,11 @@ namespace NServiceBus.Features
         /// The type of the finder
         /// </summary>
         public Type Type { get; set; }
+
+        /// <summary>
+        /// The type of message this finder is associated with
+        /// </summary>
+        public string MessageType { get; set; }
     }
 
     /// <summary>
