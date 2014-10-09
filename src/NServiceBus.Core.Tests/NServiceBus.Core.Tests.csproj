@@ -169,8 +169,6 @@
     <Compile Include="Outbox\OutboxDeduplicationBehaviorTests.cs" />
     <Compile Include="Routing\StaticMessageRouterTests.cs" />
     <Compile Include="Sagas\UniqueAttributeTests.cs" />
-    <Compile Include="Sagas\When_resolving_message_handlers_for_a_saga.cs" />
-    <Compile Include="Sagas\When_resolving_started_by_interfaces_for_a_saga.cs" />
     <Compile Include="Satellite\SatelliteLauncherContext.cs" />
     <Compile Include="Satellite\SatelliteLauncherTests.cs" />
     <Compile Include="Scheduler\DefaultSchedulerTests.cs" />

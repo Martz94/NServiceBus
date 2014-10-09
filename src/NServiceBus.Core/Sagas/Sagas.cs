@@ -25,7 +25,7 @@
                 }
             });
 
-            Prerequisite(config => config.Settings.GetAvailableTypes().Any(IsSagaType), "No sagas was found in scabbed types");
+            Prerequisite(config => config.Settings.GetAvailableTypes().Any(IsSagaType), "No sagas was found in scanned types");
         }
 
         /// <summary>
@@ -51,9 +51,7 @@
                 if (finder.Properties.TryGetValue("custom-finder-clr-type", out customFinderType))
                 {
                     context.Container.ConfigureComponent((Type)customFinderType, DependencyLifecycle.InstancePerCall);
-
                 }
-
             }
 
             context.Container.RegisterSingleton(sagaMetaModel);
@@ -93,39 +91,8 @@
             return sagas.Any(t => timeoutHandler.IsAssignableFrom(t) && !messageHandler.IsAssignableFrom(t));
         }
 
-        internal static IEnumerable<Type> GetMessageTypesHandledBySaga(Type sagaType, Conventions conventions)
-        {
-            return GetMessagesCorrespondingToFilterOnSaga(sagaType, typeof(IHandleMessages<>), conventions);
-        }
-
-        internal static IEnumerable<Type> GetMessageTypesThatRequireStartingTheSaga(Type sagaType, Conventions conventions)
-        {
-            return GetMessagesCorrespondingToFilterOnSaga(sagaType, typeof(IAmStartedByMessages<>), conventions);
-        }
-
-        static IEnumerable<Type> GetMessagesCorrespondingToFilterOnSaga(Type sagaType, Type filter, Conventions conventions)
-        {
-            foreach (var interfaceType in sagaType.GetInterfaces())
-            {
-                foreach (var argument in interfaceType.GetGenericArguments())
-                {
-                    var genericType = filter.MakeGenericType(argument);
-                    var isOfFilterType = genericType == interfaceType;
-                    if (!isOfFilterType)
-                    {
-                        continue;
-                    }
-                    if (conventions.IsMessageType(argument))
-                    {
-                        yield return argument;
-                        continue;
-                    }
-                    var message = string.Format("The saga '{0}' implements '{1}' but the message type '{2}' is not classified as a message. You should either use 'Unobtrusive Mode Messages' or the message should implement either 'IMessage', 'IEvent' or 'ICommand'.", sagaType.FullName, genericType.Name, argument.FullName);
-                    throw new Exception(message);
-                }
-            }
-        }
-
+     
+     
         Conventions conventions;
     }
 }
