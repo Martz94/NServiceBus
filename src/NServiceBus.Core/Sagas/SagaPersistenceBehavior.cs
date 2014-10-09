@@ -7,7 +7,6 @@
     using NServiceBus.Features;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Sagas;
-    using NServiceBus.Sagas.Finders;
     using NServiceBus.Unicast;
     using Pipeline;
     using Pipeline.Contexts;

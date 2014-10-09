@@ -8,6 +8,7 @@ namespace NServiceBus.Features
     using System.Runtime.Serialization;
     using NServiceBus.Saga;
     using NServiceBus.Sagas;
+    using NServiceBus.Sagas.Finders;
     using NServiceBus.Utils.Reflection;
 
     class TypeBasedSagaMetaModel : ISagaMetaModel
@@ -51,9 +52,21 @@ namespace NServiceBus.Features
             foreach (var mapping in mapper.Mappings)
             {
                 uniquePropertiesOnEntity.Add(mapping.SagaPropName);
+
+                var finder = new SagaFinderDefinition
+                {
+                    MessageType = mapping.MessageType,
+                    Type = typeof(PropertySagaFinder<>).MakeGenericType(sagaEntityType)
+                };
+
+                finder.Properties["property-accessor"] = mapping.MessageProp;
+                finder.Properties["saga-property-name"] = mapping.SagaPropName;
+
+                finders.Add(finder);
             }
 
-            var associatedMessages = GetAssociatedMessages(sagaType,new Conventions());
+            var associatedMessages = GetAssociatedMessages(sagaType,new Conventions())
+                .ToList();
 
             foreach (var associatedMessage in associatedMessages)
             {
@@ -70,7 +83,7 @@ namespace NServiceBus.Features
                 }
             }
 
-            var metadata = new SagaMetadata(associatedMessages)
+            var metadata = new SagaMetadata(associatedMessages,finders)
             {
                 Name = sagaType.FullName,
                 EntityName = sagaEntityType.FullName,
@@ -176,6 +189,7 @@ namespace NServiceBus.Features
                 {
                     MessageProp = messageFunc,
                     SagaPropName = sagaProp.Name,
+                    MessageType = typeof(TMessage).FullName
                 });
             }
 
@@ -201,108 +215,6 @@ namespace NServiceBus.Features
         IEnumerable<SagaMetadata> All { get; }
         SagaMetadata FindByName(string name);
         IEnumerable<SagaMetadata> FindByMessageType(string messageTypeId);
-    }
-
-    /// <summary>
-    /// Contains metadata for known sagas
-    /// </summary>
-    public class SagaMetadata
-    { 
-        internal SagaMetadata(IEnumerable<SagaMessage> messages)
-        {
-            Properties = new Dictionary<string, object>();
-            UniqueProperties = new List<string>();
-
-            associatedMessages = new Dictionary<string, SagaMessage>();
-
-            foreach (var sagaMessage in messages)
-            {
-                associatedMessages[sagaMessage.MessageType] = sagaMessage;
-            }
-        }
-
-        Dictionary<string, SagaMessage> associatedMessages;
-        /// <summary>
-        /// Unique properties for this saga
-        /// </summary>
-        public IEnumerable<string> UniqueProperties;
-
-        /// <summary>
-        /// The name of the saga
-        /// </summary>
-        public string Name;
-
-        /// <summary>
-        /// List of related properties
-        /// </summary>
-        public Dictionary<string, object> Properties;
-
-        /// <summary>
-        /// The name of the saga data entity
-        /// </summary>
-        public string EntityName;
-
-        /// <summary>
-        /// True if the specified message type is allowed to start the saga
-        /// </summary>
-        /// <param name="messageType"></param>
-        /// <returns></returns>
-        public bool IsMessageAllowedToStartTheSaga(string messageType)
-        {
-            SagaMessage sagaMessage;
-
-            if (!associatedMessages.TryGetValue(messageType, out sagaMessage))
-            {
-                return false;
-            }
-            return sagaMessage.IsAllowedToStartSaga;
-        }
-
-        /// <summary>
-        /// Returns the list of messages that is associated with this saga
-        /// </summary>
-        public IEnumerable<SagaMessage> AssociatedMessages
-        {
-            get { return associatedMessages.Values; }
-        }
-
-      
-        /// <summary>
-        /// Gets the configured finder for this message
-        /// </summary>
-        /// <param name="messageType"></param>
-        /// <returns></returns>
-        public SagaFinderDefinition GetFinder(string messageType)
-        {
-            throw new NotImplementedException();
-        }
-
-    }
-
-    /// <summary>
-    /// Defines a message finder
-    /// </summary>
-    public class SagaFinderDefinition   
-    {
-        internal SagaFinderDefinition()
-        {
-            Properties = new Dictionary<string, object>();
-        }
-
-        /// <summary>
-        /// Custom properties
-        /// </summary>
-        public Dictionary<string, object> Properties;
-        
-        /// <summary>
-        /// The type of the finder
-        /// </summary>
-        public Type Type { get; set; }
-
-        /// <summary>
-        /// The type of message this finder is associated with
-        /// </summary>
-        public string MessageType { get; set; }
     }
 
     /// <summary>

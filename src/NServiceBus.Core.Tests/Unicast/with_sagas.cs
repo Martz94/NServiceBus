@@ -8,7 +8,6 @@
     using Sagas;
     using NUnit.Framework;
     using Saga;
-    using Sagas.Finders;
 
     class with_sagas : using_the_unicastBus
     {

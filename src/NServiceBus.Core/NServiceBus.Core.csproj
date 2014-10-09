@@ -183,6 +183,9 @@
     <Compile Include="Sagas\Finders\CustomFinderAdapter.cs" />
     <Compile Include="Sagas\LoadSagaByIdWrapper.cs" />
     <Compile Include="Sagas\SagaConfigurationCache.cs" />
+    <Compile Include="Sagas\SagaFinderDefinition.cs" />
+    <Compile Include="Sagas\SagaMetadata.cs" />
+    <Compile Include="Sagas\SagaToMessageMap.cs" />
     <Compile Include="Sagas\TypeBasedSagaMetaModel.cs" />
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />
     <Compile Include="Scheduling\Scheduler.cs" />

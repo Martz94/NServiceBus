@@ -4,6 +4,7 @@
     using System.Linq;
     using NServiceBus.Features;
     using NServiceBus.Saga;
+    using NServiceBus.Sagas.Finders;
     using NUnit.Framework;
 
     [TestFixture]
@@ -62,13 +63,13 @@
 
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
         }
-     
+
         [Test]
         public void AutomaticallyAddUniqueForMappedProperties()
         {
             var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySagaWithMappedProperty) });
 
-            var metadata = model.FindByEntityName(typeof(MySagaWithMappedPropertyData).FullName);
+            var metadata = model.FindByEntityName(typeof(MySagaWithMappedProperty.SagaData).FullName);
 
 
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
@@ -77,12 +78,12 @@
         [Test]
         public void RequireFinderForMessagesStartingTheSaga()
         {
-            var ex = Assert.Throws<Exception>( ()=>TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty)));
+            var ex = Assert.Throws<Exception>(() => TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty)));
 
 
             Assert.True(ex.Message.Contains(typeof(MessageThatStartsTheSaga).FullName));
         }
-     
+
         [Test]
         public void DetectMessagesStartingTheSaga()
         {
@@ -92,7 +93,7 @@
 
             var messages = metadata.AssociatedMessages;
 
-            Assert.AreEqual(3,messages.Count());
+            Assert.AreEqual(3, messages.Count());
 
             Assert.True(metadata.IsMessageAllowedToStartTheSaga(typeof(SagaWith2StartersAnd1Handler.StartMessage1).FullName));
 
@@ -102,9 +103,15 @@
         }
 
         [Test]
-        public void DetectAndRegisterFinders()
+        public void DetectAndRegisterPropertyFinders()
         {
-            
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithMappedProperty));
+
+            var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
+
+            Assert.AreEqual(typeof(PropertySagaFinder<MySagaWithMappedProperty.SagaData>), finder.Type);
+            Assert.NotNull(finder.Properties["property-accessor"]);
+            Assert.AreEqual("UniqueProperty", finder.Properties["saga-property-name"]);
         }
 
         [Test]
@@ -113,9 +120,13 @@
             Assert.AreEqual(1, TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga), typeof(string) }).All.Count());
         }
 
-        class MySagaWithMappedProperty : Saga<MySagaWithMappedPropertyData>
+        class MySagaWithMappedProperty : Saga<MySagaWithMappedProperty.SagaData>
         {
-            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<MySagaWithMappedPropertyData> mapper)
+            public class SagaData : ContainSagaData
+            {
+                public int UniqueProperty { get; set; }
+            }
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
                 mapper.ConfigureMapping<SomeMessage>(m => m.SomeProperty)
                     .ToSaga(s => s.UniqueProperty);
@@ -129,7 +140,7 @@
             IHandleMessages<SagaWith2StartersAnd1Handler.Message3>
         {
 
-            public class StartMessage1:IMessage { }
+            public class StartMessage1 : IMessage { }
             public class StartMessage2 : IMessage { }
 
             public class Message3 : IMessage { }
@@ -155,10 +166,7 @@
                 throw new NotImplementedException();
             }
         }
-        class MySagaWithMappedPropertyData : ContainSagaData
-        {
-            public int UniqueProperty { get; set; }
-        }
+
 
         class MySaga : Saga<MyEntity>
         {
@@ -178,28 +186,28 @@
             IAmStartedByMessages<MessageThatStartsTheSaga>,
             IHandleMessages<MessageThatDoesntStartTheSaga>
         {
-            
+
 
             public class SagaData : ContainSagaData
             {
-                
+
             }
 
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
-                
+
 
             }
 
             public void Handle(MessageThatStartsTheSaga message)
             {
-                
+
 
             }
 
             public void Handle(MessageThatDoesntStartTheSaga message)
             {
-                
+
             }
         }
     }

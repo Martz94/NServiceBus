@@ -7,7 +7,6 @@
     using System.Runtime.Serialization;
     using NServiceBus.Saga;
     using NServiceBus.Sagas;
-    using NServiceBus.Sagas.Finders;
 
     /// <summary>
     ///     Used to configure saga.
@@ -47,6 +46,10 @@
 
             var sagaMetaModel = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes());
 
+            foreach (var finder in sagaMetaModel.All.SelectMany(m=>m.Finders))
+            {
+                context.Container.ConfigureComponent(finder.Type, DependencyLifecycle.InstancePerCall);
+            }
 
             context.Container.RegisterSingleton(sagaMetaModel);
 
