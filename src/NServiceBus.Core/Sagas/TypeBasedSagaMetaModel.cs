@@ -15,10 +15,10 @@ namespace NServiceBus.Features
     {
         readonly Dictionary<string, SagaMetadata> model = new Dictionary<string, SagaMetadata>();
 
-        public static ISagaMetaModel Create(IList<Type> availableTypes)
+        public static ISagaMetaModel Create(IList<Type> availableTypes,Conventions conventions)
         {
             return new TypeBasedSagaMetaModel(availableTypes.Where(IsSagaType)
-                .Select(t=>Create(t,availableTypes)).ToList());
+                .Select(t => Create(t, availableTypes, conventions)).ToList());
         }
 
         static bool IsSagaType(Type t)
@@ -28,9 +28,9 @@ namespace NServiceBus.Features
 
         public static SagaMetadata Create(Type sagaType)
         {
-            return Create(sagaType, new List<Type>());
+            return Create(sagaType, new List<Type>(),new Conventions());
         }
-        public static SagaMetadata Create(Type sagaType,IEnumerable<Type> availableTypes)
+        public static SagaMetadata Create(Type sagaType, IEnumerable<Type> availableTypes, Conventions conventions)
         {
             if (!IsSagaType(sagaType))
             {
@@ -46,7 +46,7 @@ namespace NServiceBus.Features
             var saga = (Saga)FormatterServices.GetUninitializedObject(sagaType);
             saga.ConfigureHowToFindSaga(mapper);
 
-            ApplyScannedFinders(mapper, sagaEntityType, availableTypes);
+            ApplyScannedFinders(mapper, sagaEntityType, availableTypes,conventions);
             
 
             var finders = new List<SagaFinderDefinition>();
@@ -58,7 +58,7 @@ namespace NServiceBus.Features
                 SetFinderForMessage(mapping, sagaEntityType, finders);
             }
 
-            var associatedMessages = GetAssociatedMessages(sagaType,new Conventions())
+            var associatedMessages = GetAssociatedMessages(sagaType,conventions)
                 .ToList();
 
             foreach (var associatedMessage in associatedMessages)
@@ -90,7 +90,7 @@ namespace NServiceBus.Features
             return metadata;
         }
 
-        static void ApplyScannedFinders(SagaMapper mapper,Type sagaEntityType, IEnumerable<Type> availableTypes)
+        static void ApplyScannedFinders(SagaMapper mapper,Type sagaEntityType, IEnumerable<Type> availableTypes,Conventions conventions)
         {
             var actualFinders = availableTypes.Where(t => typeof(IFinder).IsAssignableFrom(t))
                 .ToList();
@@ -115,7 +115,7 @@ namespace NServiceBus.Features
                             entityType = type;
                         }
 
-                        if (new Conventions().IsMessageType(type) || type == typeof(object))
+                        if (conventions.IsMessageType(type) || type == typeof(object))
                         {
                             messageType = type;
                         }

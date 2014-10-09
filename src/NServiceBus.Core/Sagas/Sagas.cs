@@ -38,7 +38,7 @@
             context.Pipeline.Register<SagaPersistenceBehavior.Registration>();
 
       
-            var sagaMetaModel = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes());
+            var sagaMetaModel = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes(),conventions);
 
             foreach (var finder in sagaMetaModel.All.SelectMany(m=>m.Finders))
             {

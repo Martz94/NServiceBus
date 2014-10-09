@@ -21,7 +21,7 @@
                     typeof(SagaWithTwoUniqueProperties),
                     typeof(AnotherSagaWithTwoUniqueProperties),
                     typeof(SagaWithUniqueProperty)
-                }));
+                },new Conventions()));
 
 
             inMemorySagaPersister.Save(saga1);

@@ -7,6 +7,7 @@
     using NServiceBus.Saga;
     using NServiceBus.Sagas.Finders;
     using NUnit.Framework;
+    using Conventions = NServiceBus.Conventions;
 
     [TestFixture]
     public class TypeBasedSagaMetaModelTests
@@ -14,7 +15,7 @@
         [Test]
         public void FindSagasByName()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
+            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) },new Conventions());
 
             var metadata = model.FindByName(typeof(MySaga).FullName);
 
@@ -24,7 +25,7 @@
         [Test]
         public void FindSagasByEntityName()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
+            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) }, new Conventions());
 
             var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
 
@@ -35,9 +36,8 @@
         [Test]
         public void GetEntityClrType()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
-
-            var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
+            
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySaga));
 
 
             Assert.AreEqual(typeof(MyEntity), metadata.Properties["entity-clr-type"]);
@@ -46,10 +46,7 @@
         [Test]
         public void GetSagaClrType()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
-
-            var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
-
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySaga));
 
             Assert.AreEqual(typeof(MySaga), metadata.Properties["saga-clr-type"]);
         }
@@ -57,9 +54,7 @@
         [Test]
         public void DetectUniquePropertiesByAttribute()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) });
-
-            var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySaga));
 
 
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
@@ -68,11 +63,9 @@
         [Test]
         public void AutomaticallyAddUniqueForMappedProperties()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySagaWithMappedProperty) });
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithMappedProperty));
 
-            var metadata = model.FindByEntityName(typeof(MySagaWithMappedProperty.SagaData).FullName);
-
-
+          
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
         }
 
@@ -88,9 +81,7 @@
         [Test]
         public void DetectMessagesStartingTheSaga()
         {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(SagaWith2StartersAnd1Handler) });
-
-            var metadata = model.FindByName(typeof(SagaWith2StartersAnd1Handler).FullName);
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(SagaWith2StartersAnd1Handler));
 
             var messages = metadata.AssociatedMessages;
 
@@ -130,7 +121,7 @@
         public void DetectAndRegisterCustomFindersUsingScanning()
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithScannedFinder),
-                new List<Type>{typeof(MySagaWithScannedFinder.CustomFinder)});
+                new List<Type>{typeof(MySagaWithScannedFinder.CustomFinder)},new Conventions());
 
             var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
 
@@ -141,7 +132,7 @@
         [Test]
         public void FilterOutNonSagaTypes()
         {
-            Assert.AreEqual(1, TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga), typeof(string) }).All.Count());
+            Assert.AreEqual(1, TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga), typeof(string) },new Conventions()).All.Count());
         }
 
         class MySagaWithMappedProperty : Saga<MySagaWithMappedProperty.SagaData>
