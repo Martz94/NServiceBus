@@ -140,15 +140,24 @@
             IHandleMessages<SagaWith2StartersAnd1Handler.Message3>
         {
 
-            public class StartMessage1 : IMessage { }
-            public class StartMessage2 : IMessage { }
+            public class StartMessage1 : IMessage {
+                public string SomeId { get; set; }
+            }
+            public class StartMessage2 : IMessage {
+                public string SomeId { get; set; }
+            }
 
             public class Message3 : IMessage { }
-            public class SagaData : ContainSagaData { }
+            public class SagaData : ContainSagaData {
+                public string SomeId { get; set; }
+            }
 
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
-
+                mapper.ConfigureMapping<StartMessage1>(m=>m.SomeId)
+                    .ToSaga(s=>s.SomeId);
+                mapper.ConfigureMapping<StartMessage2>(m => m.SomeId)
+                    .ToSaga(s => s.SomeId);
             }
 
             public void Handle(StartMessage1 message)
