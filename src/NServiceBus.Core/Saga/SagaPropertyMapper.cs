@@ -26,5 +26,26 @@ namespace NServiceBus.Saga
         {
             return new ToSagaExpression<TSagaData, TMessage>(sagaMessageFindingConfiguration, messageProperty);
         }
+
+        internal ToMessageExpression<TFinder> UseCustomFinder<TFinder>()
+        {
+            return new ToMessageExpression<TFinder>(sagaMessageFindingConfiguration);
+        }
+    }
+
+    //until we decide if this is a good idea
+    internal class ToMessageExpression<TFinder>
+    {
+        readonly IConfigureHowToFindSagaWithMessage sagaMessageFindingConfiguration;
+
+        public ToMessageExpression(IConfigureHowToFindSagaWithMessage sagaMessageFindingConfiguration)
+        {
+            this.sagaMessageFindingConfiguration = sagaMessageFindingConfiguration;
+        }
+
+        public void ForMessage<TMessage>()
+        {
+            sagaMessageFindingConfiguration.ConfigureCustomFinder(typeof(TFinder),typeof(TMessage));
+        }
     }
 }

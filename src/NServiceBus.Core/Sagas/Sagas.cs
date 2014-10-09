@@ -49,6 +49,17 @@
             foreach (var finder in sagaMetaModel.All.SelectMany(m=>m.Finders))
             {
                 context.Container.ConfigureComponent(finder.Type, DependencyLifecycle.InstancePerCall);
+
+                //todo improve
+
+                object customFinderType;
+
+                if (finder.Properties.TryGetValue("custom-finder-clr-type", out customFinderType))
+                {
+                    context.Container.ConfigureComponent((Type)customFinderType, DependencyLifecycle.InstancePerCall);
+
+                }
+
             }
 
             context.Container.RegisterSingleton(sagaMetaModel);
@@ -62,13 +73,7 @@
                     continue;
                 }
 
-                if (IsFinderType(t))
-                {
-                    context.Container.ConfigureComponent(t, DependencyLifecycle.InstancePerCall);
-                    ConfigureFinder(t, conventions);
-                    continue;
-                }
-
+               
                 if (IsSagaNotFoundHandler(t))
                 {
                     context.Container.ConfigureComponent(t, DependencyLifecycle.InstancePerCall);

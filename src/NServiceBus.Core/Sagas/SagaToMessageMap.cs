@@ -6,6 +6,7 @@ namespace NServiceBus.Sagas
     {
         public Func<object, object> MessageProp;
         public string SagaPropName;
-        public string MessageType;
+        public Type MessageType;
+        public Type CustomFinderType;
     }
 }

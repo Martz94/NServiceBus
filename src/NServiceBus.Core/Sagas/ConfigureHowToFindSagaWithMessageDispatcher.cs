@@ -34,6 +34,11 @@ namespace NServiceBus.Sagas
             sagaConfigurationCache.ConfigureHowToFindSagaWithMessage(typeof(TSagaEntity), typeof(TMessage), sagaToMessageMap);
         }
 
+        public void ConfigureCustomFinder(Type finderType, Type messageType)
+        {
+            
+        }
+
         // ReSharper disable once UnusedParameter.Local
         void ThrowIfNotPropertyLambdaExpression<TSagaEntity>(Expression<Func<TSagaEntity, object>> expression, PropertyInfo propertyInfo)
         {

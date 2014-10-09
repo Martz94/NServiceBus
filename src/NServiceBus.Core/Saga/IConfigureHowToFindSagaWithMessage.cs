@@ -16,5 +16,12 @@ namespace NServiceBus.Saga
         /// which saga entity property in the persistent saga store.
         /// </summary>
         void ConfigureMapping<TSagaEntity, TMessage>(Expression<Func<TSagaEntity, object>> sagaEntityProperty, Expression<Func<TMessage, object>> messageProperty) where TSagaEntity : IContainSagaData;
+
+        /// <summary>
+        /// Registers a custom finder
+        /// </summary>
+        /// <param name="finderType">The finder type</param>
+        /// <param name="messageType">The message type for this finder</param>
+        void ConfigureCustomFinder(Type finderType,Type messageType);
     }
 }

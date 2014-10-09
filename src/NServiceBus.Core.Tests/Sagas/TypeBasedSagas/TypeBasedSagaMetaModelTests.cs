@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Core.Tests.Sagas.TypeBasedSagas
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Features;
     using NServiceBus.Saga;
@@ -115,6 +116,29 @@
         }
 
         [Test]
+        public void RegisterCustomFindersFromMappings()
+        {
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithCustomFinder));
+
+            var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
+
+            Assert.AreEqual(typeof(CustomFinderAdapter<MySagaWithCustomFinder.SagaData, SomeMessage>), finder.Type);
+            Assert.AreEqual(typeof(MySagaWithCustomFinder.MyCustomFinder), finder.Properties["custom-finder-clr-type"]);
+        }
+
+        [Test]
+        public void DetectAndRegisterCustomFindersUsingScanning()
+        {
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithScannedFinder),
+                new List<Type>{typeof(MySagaWithScannedFinder.CustomFinder)});
+
+            var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
+
+            Assert.AreEqual(typeof(CustomFinderAdapter<MySagaWithScannedFinder.SagaData, SomeMessage>), finder.Type);
+            Assert.AreEqual(typeof(MySagaWithScannedFinder.CustomFinder), finder.Properties["custom-finder-clr-type"]);
+        }
+
+        [Test]
         public void FilterOutNonSagaTypes()
         {
             Assert.AreEqual(1, TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga), typeof(string) }).All.Count());
@@ -133,6 +157,54 @@
             }
         }
 
+        class MySagaWithCustomFinder : Saga<MySagaWithCustomFinder.SagaData>, IAmStartedByMessages<SomeMessage>
+        {
+            public class SagaData : ContainSagaData
+            {
+            }
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
+            {
+                mapper.UseCustomFinder<MyCustomFinder>()
+                    .ForMessage<SomeMessage>();
+            }
+
+            internal class MyCustomFinder : IFindSagas<SagaData>.Using<SomeMessage>
+            {
+                public SagaData FindBy(SomeMessage message)
+                {
+                    return null;
+                }
+            }
+
+            public void Handle(SomeMessage message)
+            {
+
+            }
+        }
+
+        class MySagaWithScannedFinder : Saga<MySagaWithScannedFinder.SagaData>, IAmStartedByMessages<SomeMessage>
+        {
+            public class SagaData : ContainSagaData
+            {
+            }
+            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
+            {
+            }
+
+            internal class CustomFinder : IFindSagas<SagaData>.Using<SomeMessage>
+            {
+                public SagaData FindBy(SomeMessage message)
+                {
+                    return null;
+                }
+            }
+
+            public void Handle(SomeMessage message)
+            {
+
+            }
+        }
+
 
         class SagaWith2StartersAnd1Handler : Saga<SagaWith2StartersAnd1Handler.SagaData>,
             IAmStartedByMessages<SagaWith2StartersAnd1Handler.StartMessage1>,
@@ -140,22 +212,25 @@
             IHandleMessages<SagaWith2StartersAnd1Handler.Message3>
         {
 
-            public class StartMessage1 : IMessage {
+            public class StartMessage1 : IMessage
+            {
                 public string SomeId { get; set; }
             }
-            public class StartMessage2 : IMessage {
+            public class StartMessage2 : IMessage
+            {
                 public string SomeId { get; set; }
             }
 
             public class Message3 : IMessage { }
-            public class SagaData : ContainSagaData {
+            public class SagaData : ContainSagaData
+            {
                 public string SomeId { get; set; }
             }
 
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
-                mapper.ConfigureMapping<StartMessage1>(m=>m.SomeId)
-                    .ToSaga(s=>s.SomeId);
+                mapper.ConfigureMapping<StartMessage1>(m => m.SomeId)
+                    .ToSaga(s => s.SomeId);
                 mapper.ConfigureMapping<StartMessage2>(m => m.SomeId)
                     .ToSaga(s => s.SomeId);
             }
@@ -221,7 +296,7 @@
         }
     }
 
-    class SomeMessage
+    class SomeMessage : IMessage
     {
         public int SomeProperty { get; set; }
     }
