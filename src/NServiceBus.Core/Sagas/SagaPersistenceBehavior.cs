@@ -1,19 +1,17 @@
-﻿namespace NServiceBus
+﻿namespace NServiceBus.Sagas
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Logging;
-    using NServiceBus.Features;
+    using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
-    using NServiceBus.Sagas;
+    using NServiceBus.Pipeline;
+    using NServiceBus.Pipeline.Contexts;
+    using NServiceBus.Saga;
+    using NServiceBus.Timeout;
+    using NServiceBus.Transports;
     using NServiceBus.Unicast;
-    using Pipeline;
-    using Pipeline.Contexts;
-    using Saga;
-    using Timeout;
-    using Transports;
-    using Unicast.Messages;
+    using NServiceBus.Unicast.Messages;
 
     class SagaPersistenceBehavior : IBehavior<IncomingContext>
     {
@@ -31,7 +29,7 @@
             //todo - foreach
             var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
 
-            var saga = context.MessageHandler.Instance as Saga.Saga;
+            var saga = context.MessageHandler.Instance as NServiceBus.Saga.Saga;
             if (saga == null)
             {
                 next();
@@ -238,7 +236,7 @@
             return ((SagaFinder)finder).Find(currentContext.Builder, finderDefinition, message);
         }
 
-        void NotifyTimeoutManagerThatSagaHasCompleted(Saga.Saga saga)
+        void NotifyTimeoutManagerThatSagaHasCompleted(NServiceBus.Saga.Saga saga)
         {
             MessageDeferrer.ClearDeferredMessages(Headers.SagaId, saga.Entity.Id.ToString());
         }

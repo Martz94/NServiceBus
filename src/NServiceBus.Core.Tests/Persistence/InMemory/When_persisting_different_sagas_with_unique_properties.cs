@@ -3,6 +3,7 @@
     using System;
     using NServiceBus.Features;
     using NServiceBus.InMemory.SagaPersister;
+    using NServiceBus.Sagas;
     using NUnit.Framework;
 
     [TestFixture]

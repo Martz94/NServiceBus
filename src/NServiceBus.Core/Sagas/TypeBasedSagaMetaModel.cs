@@ -1,4 +1,4 @@
-namespace NServiceBus.Features
+namespace NServiceBus.Sagas
 {
     using System;
     using System.Collections.Generic;
@@ -7,7 +7,6 @@ namespace NServiceBus.Features
     using System.Reflection;
     using System.Runtime.Serialization;
     using NServiceBus.Saga;
-    using NServiceBus.Sagas;
     using NServiceBus.Sagas.Finders;
     using NServiceBus.Utils.Reflection;
 

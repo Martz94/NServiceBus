@@ -6,6 +6,7 @@ namespace NServiceBus.InMemory.SagaPersister
     using System.Linq;
     using System.Threading;
     using NServiceBus.Features;
+    using NServiceBus.Sagas;
     using Saga;
     using Serializers.Json;
 

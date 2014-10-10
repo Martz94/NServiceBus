@@ -5,6 +5,7 @@ namespace NServiceBus.SagaPersisters.InMemory.Tests
     using NServiceBus.Features;
     using NServiceBus.InMemory.SagaPersister;
     using NServiceBus.Saga;
+    using NServiceBus.Sagas;
     using NUnit.Framework;
 
     abstract class InMemorySagaPersistenceFixture

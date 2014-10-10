@@ -3,6 +3,7 @@
     using System;
     using Contexts;
     using InMemory.SagaPersister;
+    using NServiceBus.Sagas;
     using NUnit.Framework;
     using Saga;
 

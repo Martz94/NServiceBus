@@ -1,7 +1,6 @@
-﻿namespace NServiceBus
+﻿namespace NServiceBus.Sagas
 {
     using System;
-    using NServiceBus.Features;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
