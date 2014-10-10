@@ -29,7 +29,7 @@
             //todo - foreach
             var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
 
-            var saga = context.MessageHandler.Instance as NServiceBus.Saga.Saga;
+            var saga = context.MessageHandler.Instance as Saga;
             if (saga == null)
             {
                 next();
@@ -236,7 +236,7 @@
             return ((SagaFinder)finder).Find(currentContext.Builder, finderDefinition, message);
         }
 
-        void NotifyTimeoutManagerThatSagaHasCompleted(NServiceBus.Saga.Saga saga)
+        void NotifyTimeoutManagerThatSagaHasCompleted(Saga saga)
         {
             MessageDeferrer.ClearDeferredMessages(Headers.SagaId, saga.Entity.Id.ToString());
         }

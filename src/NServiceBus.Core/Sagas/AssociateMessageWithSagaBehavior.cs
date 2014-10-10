@@ -6,9 +6,9 @@
 
     class AssociateMessageWithSagaBehavior:IBehavior<IncomingContext>
     {
-        readonly ISagaMetaModel sagaModel;
+        readonly SagaMetaModel sagaModel;
 
-        public AssociateMessageWithSagaBehavior(ISagaMetaModel sagaModel)
+        public AssociateMessageWithSagaBehavior(SagaMetaModel sagaModel)
         {
             this.sagaModel = sagaModel;
         }

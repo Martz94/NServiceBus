@@ -5,7 +5,6 @@ namespace NServiceBus.InMemory.SagaPersister
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using NServiceBus.Features;
     using NServiceBus.Sagas;
     using Saga;
     using Serializers.Json;
@@ -15,9 +14,9 @@ namespace NServiceBus.InMemory.SagaPersister
     /// </summary>
     class InMemorySagaPersister : ISagaPersister
     {
-        readonly ISagaMetaModel sagaModel;
+        readonly SagaMetaModel sagaModel;
 
-        public InMemorySagaPersister(ISagaMetaModel sagaModel)
+        public InMemorySagaPersister(SagaMetaModel sagaModel)
         {
             this.sagaModel = sagaModel;
         }

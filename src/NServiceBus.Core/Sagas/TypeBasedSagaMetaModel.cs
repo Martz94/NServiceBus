@@ -10,14 +10,12 @@ namespace NServiceBus.Sagas
     using NServiceBus.Sagas.Finders;
     using NServiceBus.Utils.Reflection;
 
-    class TypeBasedSagaMetaModel : ISagaMetaModel
+    class TypeBasedSagaMetaModel
     {
-        readonly Dictionary<string, SagaMetadata> model = new Dictionary<string, SagaMetadata>();
-
-        public static ISagaMetaModel Create(IList<Type> availableTypes,Conventions conventions)
+        public static IEnumerable<SagaMetadata> Create(IList<Type> availableTypes, Conventions conventions)
         {
-            return new TypeBasedSagaMetaModel(availableTypes.Where(IsSagaType)
-                .Select(t => Create(t, availableTypes, conventions)).ToList());
+            return availableTypes.Where(IsSagaType)
+                .Select(t => Create(t, availableTypes, conventions)).ToList();
         }
 
         static bool IsSagaType(Type t)
@@ -210,36 +208,7 @@ namespace NServiceBus.Sagas
             return UniqueAttribute.GetUniqueProperties(sagaEntityType).Select(pt => pt.Name);
         }
 
-        private TypeBasedSagaMetaModel(List<SagaMetadata> metadata)
-
-        {
-            foreach (var sagaMetaData in metadata)
-            {
-                model[sagaMetaData.EntityName] = sagaMetaData;
-            }
-        }
-
-        public SagaMetadata FindByEntityName(string name)
-        {
-            return model[name];
-        }
-
-        public IEnumerable<SagaMetadata> All
-        {
-            get { return model.Values; }
-        }
-
-        public SagaMetadata FindByName(string name)
-        {
-            //todo - add a more efficient lookup
-            return model.Values.Single(m => m.Name == name);
-        }
-
-        public IEnumerable<SagaMetadata> FindByMessageType(string messageTypeId)
-        {
-            //todo
-            return model.Values;
-        }
+     
 
         class SagaMapper : IConfigureHowToFindSagaWithMessage
         {
@@ -283,36 +252,5 @@ namespace NServiceBus.Sagas
             }
         }
 
-    }
-
-    interface ISagaMetaModel
-    {
-        SagaMetadata FindByEntityName(string name);
-
-        IEnumerable<SagaMetadata> All { get; }
-        SagaMetadata FindByName(string name);
-        IEnumerable<SagaMetadata> FindByMessageType(string messageTypeId);
-    }
-
-    /// <summary>
-    /// Representation of a message that is related to a saga
-    /// </summary>
-    public class SagaMessage
-    {
-        /// <summary>
-        /// True if the message can start the saga
-        /// </summary>
-        public readonly bool IsAllowedToStartSaga;
-
-        /// <summary>
-        /// The type of the message
-        /// </summary>
-        public readonly string MessageType;
-
-        internal SagaMessage(string messageType, bool isAllowedToStart)
-        {
-            MessageType = messageType;
-            IsAllowedToStartSaga = isAllowedToStart;
-        }
     }
 }

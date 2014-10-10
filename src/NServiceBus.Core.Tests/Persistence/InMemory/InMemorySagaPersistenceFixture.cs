@@ -2,7 +2,6 @@ namespace NServiceBus.SagaPersisters.InMemory.Tests
 {
     using System;
     using System.Collections.Generic;
-    using NServiceBus.Features;
     using NServiceBus.InMemory.SagaPersister;
     using NServiceBus.Saga;
     using NServiceBus.Sagas;
@@ -21,7 +20,7 @@ namespace NServiceBus.SagaPersisters.InMemory.Tests
         [SetUp]
         public void SetUp()
         {
-            persister = new InMemorySagaPersister(TypeBasedSagaMetaModel.Create(sagaTypes,new Conventions()));
+            persister = new InMemorySagaPersister(new SagaMetaModel(TypeBasedSagaMetaModel.Create(sagaTypes,new Conventions())));
 
         }
 

@@ -39,14 +39,16 @@
             context.Pipeline.Register<SagaPersistenceBehavior.Registration>();
 
       
-            var sagaMetaModel = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes(),conventions);
+            var typeBasedSagas = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes(),conventions);
+
+
+            var sagaMetaModel = new SagaMetaModel(typeBasedSagas);
 
             foreach (var finder in sagaMetaModel.All.SelectMany(m=>m.Finders))
             {
                 context.Container.ConfigureComponent(finder.Type, DependencyLifecycle.InstancePerCall);
 
                 //todo improve
-
                 object customFinderType;
 
                 if (finder.Properties.TryGetValue("custom-finder-clr-type", out customFinderType))

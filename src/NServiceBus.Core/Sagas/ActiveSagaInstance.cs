@@ -1,7 +1,6 @@
 namespace NServiceBus.Sagas
 {
     using System;
-    using NServiceBus.Features;
     using Saga;
 
     /// <summary>

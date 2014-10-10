@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using NServiceBus.Features;
     using NServiceBus.Saga;
     using NServiceBus.Sagas;
     using NServiceBus.Sagas.Finders;
@@ -13,31 +12,12 @@
     [TestFixture]
     public class TypeBasedSagaMetaModelTests
     {
-        [Test]
-        public void FindSagasByName()
-        {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) },new Conventions());
-
-            var metadata = model.FindByName(typeof(MySaga).FullName);
-
-
-            Assert.NotNull(metadata);
-        }
-        [Test]
-        public void FindSagasByEntityName()
-        {
-            var model = TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga) }, new Conventions());
-
-            var metadata = model.FindByEntityName(typeof(MyEntity).FullName);
-
-
-            Assert.NotNull(metadata);
-        }
+      
 
         [Test]
         public void GetEntityClrType()
         {
-            
+
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySaga));
 
 
@@ -66,7 +46,7 @@
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithMappedProperty));
 
-          
+
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
         }
 
@@ -122,7 +102,10 @@
         public void DetectAndRegisterCustomFindersUsingScanning()
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithScannedFinder),
-                new List<Type>{typeof(MySagaWithScannedFinder.CustomFinder)},new Conventions());
+                new List<Type>
+                {
+                    typeof(MySagaWithScannedFinder.CustomFinder)
+                }, new Conventions());
 
             var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
 
@@ -130,11 +113,6 @@
             Assert.AreEqual(typeof(MySagaWithScannedFinder.CustomFinder), finder.Properties["custom-finder-clr-type"]);
         }
 
-        [Test]
-        public void FilterOutNonSagaTypes()
-        {
-            Assert.AreEqual(1, TypeBasedSagaMetaModel.Create(new[] { typeof(MySaga), typeof(string) },new Conventions()).All.Count());
-        }
 
         class MySagaWithMappedProperty : Saga<MySagaWithMappedProperty.SagaData>
         {
@@ -142,6 +120,7 @@
             {
                 public int UniqueProperty { get; set; }
             }
+
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
                 mapper.ConfigureMapping<SomeMessage>(m => m.SomeProperty)
@@ -154,6 +133,7 @@
             public class SagaData : ContainSagaData
             {
             }
+
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
                 mapper.UseCustomFinder<MyCustomFinder>()
@@ -179,6 +159,7 @@
             public class SagaData : ContainSagaData
             {
             }
+
             protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
             {
             }
@@ -208,12 +189,16 @@
             {
                 public string SomeId { get; set; }
             }
+
             public class StartMessage2 : IMessage
             {
                 public string SomeId { get; set; }
             }
 
-            public class Message3 : IMessage { }
+            public class Message3 : IMessage
+            {
+            }
+
             public class SagaData : ContainSagaData
             {
                 public string SomeId { get; set; }
