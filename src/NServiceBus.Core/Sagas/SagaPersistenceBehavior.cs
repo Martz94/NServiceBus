@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.Sagas
+﻿namespace NServiceBus
 {
     using System;
     using System.Collections.Generic;
@@ -8,6 +8,7 @@
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Saga;
+    using NServiceBus.Sagas;
     using NServiceBus.Timeout;
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
@@ -29,7 +30,7 @@
             //todo - foreach
             var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
 
-            var saga = context.MessageHandler.Instance as Saga;
+            var saga = context.MessageHandler.Instance as Saga.Saga;
             if (saga == null)
             {
                 next();
@@ -236,7 +237,7 @@
             return ((SagaFinder)finder).Find(currentContext.Builder, finderDefinition, message);
         }
 
-        void NotifyTimeoutManagerThatSagaHasCompleted(Saga saga)
+        void NotifyTimeoutManagerThatSagaHasCompleted(Saga.Saga saga)
         {
             MessageDeferrer.ClearDeferredMessages(Headers.SagaId, saga.Entity.Id.ToString());
         }

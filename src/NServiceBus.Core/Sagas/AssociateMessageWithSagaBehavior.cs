@@ -1,8 +1,9 @@
-﻿namespace NServiceBus.Sagas
+﻿namespace NServiceBus
 {
     using System;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
+    using NServiceBus.Sagas;
 
     class AssociateMessageWithSagaBehavior:IBehavior<IncomingContext>
     {

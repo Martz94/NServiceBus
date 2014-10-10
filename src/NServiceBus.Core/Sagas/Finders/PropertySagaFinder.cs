@@ -1,7 +1,6 @@
 namespace NServiceBus.Sagas.Finders
 {
     using System;
-    using NServiceBus.Features;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Unicast.Messages;
     using Saga;
