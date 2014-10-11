@@ -35,7 +35,7 @@
         protected internal override void Setup(FeatureConfigurationContext context)
         {
             // Register the Saga related behavior for incoming messages
-            context.Pipeline.Register<AssociateMessageWithSagaBehavior.Registration>();
+            context.Pipeline.Register<AssociateMessageWithSagasBehavior.Registration>();
             context.Pipeline.Register<SagaPersistenceBehavior.Registration>();
 
       

@@ -50,7 +50,7 @@
             Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
         }
 
-        [Test]
+        [Test,Ignore("Not sure we should enforce this yet")]
         public void RequireFinderForMessagesStartingTheSaga()
         {
             var ex = Assert.Throws<Exception>(() => TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty)));
@@ -60,27 +60,39 @@
         }
 
         [Test]
+        public void HandleNonExistingFinders()
+        {
+            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty));
+            SagaFinderDefinition finder;
+
+            Assert.False(metadata.TryGetFinder(typeof(MessageThatStartsTheSaga).FullName,out finder));
+        }
+
+        [Test]
         public void DetectMessagesStartingTheSaga()
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(SagaWith2StartersAnd1Handler));
 
             var messages = metadata.AssociatedMessages;
 
-            Assert.AreEqual(3, messages.Count());
+            Assert.AreEqual(4, messages.Count());
 
             Assert.True(metadata.IsMessageAllowedToStartTheSaga(typeof(SagaWith2StartersAnd1Handler.StartMessage1).FullName));
 
             Assert.True(metadata.IsMessageAllowedToStartTheSaga(typeof(SagaWith2StartersAnd1Handler.StartMessage2).FullName));
 
             Assert.False(metadata.IsMessageAllowedToStartTheSaga(typeof(SagaWith2StartersAnd1Handler.Message3).FullName));
+
+            Assert.False(metadata.IsMessageAllowedToStartTheSaga(typeof(SagaWith2StartersAnd1Handler.MyTimeout).FullName));
         }
+
 
         [Test]
         public void DetectAndRegisterPropertyFinders()
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithMappedProperty));
 
-            var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
+            var finder = GetFinder(metadata,typeof(SomeMessage).FullName);
 
             Assert.AreEqual(typeof(PropertySagaFinder<MySagaWithMappedProperty.SagaData>), finder.Type);
             Assert.NotNull(finder.Properties["property-accessor"]);
@@ -92,7 +104,7 @@
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithCustomFinder));
 
-            var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
+            var finder = GetFinder(metadata,typeof(SomeMessage).FullName);
 
             Assert.AreEqual(typeof(CustomFinderAdapter<MySagaWithCustomFinder.SagaData, SomeMessage>), finder.Type);
             Assert.AreEqual(typeof(MySagaWithCustomFinder.MyCustomFinder), finder.Properties["custom-finder-clr-type"]);
@@ -107,12 +119,23 @@
                     typeof(MySagaWithScannedFinder.CustomFinder)
                 }, new Conventions());
 
-            var finder = metadata.GetFinder(typeof(SomeMessage).FullName);
+            var finder = GetFinder(metadata, typeof(SomeMessage).FullName);
 
             Assert.AreEqual(typeof(CustomFinderAdapter<MySagaWithScannedFinder.SagaData, SomeMessage>), finder.Type);
             Assert.AreEqual(typeof(MySagaWithScannedFinder.CustomFinder), finder.Properties["custom-finder-clr-type"]);
         }
 
+        SagaFinderDefinition GetFinder(SagaMetadata metadata, string messageType)
+        {
+            SagaFinderDefinition finder;
+
+            if (!metadata.TryGetFinder(messageType, out finder))
+            {
+                throw new Exception("Finder not found");
+            }
+
+            return finder;
+        }
 
         class MySagaWithMappedProperty : Saga<MySagaWithMappedProperty.SagaData>
         {
@@ -182,7 +205,8 @@
         class SagaWith2StartersAnd1Handler : Saga<SagaWith2StartersAnd1Handler.SagaData>,
             IAmStartedByMessages<SagaWith2StartersAnd1Handler.StartMessage1>,
             IAmStartedByMessages<SagaWith2StartersAnd1Handler.StartMessage2>,
-            IHandleMessages<SagaWith2StartersAnd1Handler.Message3>
+            IHandleMessages<SagaWith2StartersAnd1Handler.Message3>,
+            IHandleTimeouts<SagaWith2StartersAnd1Handler.MyTimeout>
         {
 
             public class StartMessage1 : IMessage
@@ -225,6 +249,14 @@
             public void Handle(Message3 message)
             {
                 throw new NotImplementedException();
+            }
+
+            public class MyTimeout
+            {
+            }
+
+            public void Timeout(MyTimeout state)
+            {
             }
         }
 
@@ -278,13 +310,13 @@
         public int SomeProperty { get; set; }
     }
 
-    class MessageThatDoesntStartTheSaga
+    class MessageThatDoesntStartTheSaga : IMessage
     {
         public int SomeProperty { get; set; }
     }
 
 
-    class MessageThatStartsTheSaga
+    class MessageThatStartsTheSaga : IMessage
     {
         public int SomeProperty { get; set; }
     }

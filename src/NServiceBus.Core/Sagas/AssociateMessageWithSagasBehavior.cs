@@ -5,11 +5,11 @@
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Sagas;
 
-    class AssociateMessageWithSagaBehavior:IBehavior<IncomingContext>
+    class AssociateMessageWithSagasBehavior:IBehavior<IncomingContext>
     {
         readonly SagaMetaModel sagaModel;
 
-        public AssociateMessageWithSagaBehavior(SagaMetaModel sagaModel)
+        public AssociateMessageWithSagasBehavior(SagaMetaModel sagaModel)
         {
             this.sagaModel = sagaModel;
         }
@@ -39,7 +39,7 @@
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("AssociateMessageWithSagaBehavior", typeof(AssociateMessageWithSagaBehavior), "Determines if the incoming message should hit a saga")
+                : base("AssociateMessageWithSagasBehavior", typeof(AssociateMessageWithSagasBehavior), "Determines if the incoming message should hit a saga")
             {
                 InsertBefore(WellKnownStep.InvokeSaga);
                 InsertAfter(WellKnownStep.DeserializeMessages);

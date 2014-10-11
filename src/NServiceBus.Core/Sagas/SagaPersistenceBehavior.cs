@@ -26,12 +26,13 @@
 
         public void Invoke(IncomingContext context, Action next)
         {
+            var potentialSagasForThisHandler = context.Get<IEnumerable<SagaMetadata>>();
 
-            //todo - foreach
-            var sagaMetadata = context.Get<IEnumerable<SagaMetadata>>().Single();
+         
+            //todo - improve
+            var sagaMetadata = potentialSagasForThisHandler.SingleOrDefault(metadata => metadata.Name == context.MessageHandler.Instance.GetType().FullName);
 
-            var saga = context.MessageHandler.Instance as Saga.Saga;
-            if (saga == null)
+            if (sagaMetadata == null)
             {
                 next();
                 return;
@@ -39,6 +40,7 @@
 
             currentContext = context;
 
+            var saga = (Saga.Saga)context.MessageHandler.Instance;
 
             var sagaInstanceState = new ActiveSagaInstance(saga, sagaMetadata);
 
@@ -228,7 +230,12 @@
                 return loader.Load(SagaPersister, sagaId);
             }
 
-            var finderDefinition = metadata.GetFinder(message.MessageType.FullName);
+            SagaFinderDefinition finderDefinition;
+
+            if (!metadata.TryGetFinder(message.MessageType.FullName, out finderDefinition))
+            {
+                return null;
+            }
 
             var finderType = finderDefinition.Type;
 

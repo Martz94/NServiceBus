@@ -83,15 +83,17 @@ namespace NServiceBus.Sagas
             get { return sagaFinders.Values; }
         }
 
+        
 
         /// <summary>
         /// Gets the configured finder for this message
         /// </summary>
         /// <param name="messageType"></param>
-        /// <returns></returns>
-        public SagaFinderDefinition GetFinder(string messageType)
+        /// <param name="finderDefinition">The finder if present</param>
+        /// <returns>True if finder exists</returns>
+        public bool TryGetFinder(string messageType,out SagaFinderDefinition finderDefinition)
         {
-            return sagaFinders[messageType];
+            return sagaFinders.TryGetValue(messageType,out finderDefinition);
         }
 
     }
