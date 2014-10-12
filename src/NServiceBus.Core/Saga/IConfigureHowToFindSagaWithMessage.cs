@@ -8,6 +8,7 @@ namespace NServiceBus.Saga
     /// or register implementations of it in the container unless you intend
     /// to substantially change the way sagas work in nServiceBus.
     /// </summary>
+    [ObsoleteEx(RemoveInVersion = "6.1",TreatAsErrorFromVersion = "6.0",Message = "Not an extension point, should not have been pulbic")]
     public interface IConfigureHowToFindSagaWithMessage
     {
         /// <summary>
