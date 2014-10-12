@@ -53,9 +53,7 @@
 
             if (loadedEntity == null)
             {
-                //todo - refactor to use the saga name instead
-                var sagaType = (Type)sagaMetadata.Properties["saga-clr-type"];
-
+                
                 //if this message are not allowed to start the saga
                 if (sagaMetadata.IsMessageAllowedToStartTheSaga(context.IncomingLogicalMessage.MessageType.FullName))
                 {
@@ -65,7 +63,7 @@
                 {
                     sagaInstanceState.MarkAsNotFound();
 
-                    InvokeSagaNotFoundHandlers(sagaType);
+                    InvokeSagaNotFoundHandlers(sagaMetadata);
                 }
             }
             else
@@ -152,9 +150,9 @@
             }
         }
 
-        void InvokeSagaNotFoundHandlers(Type sagaType)
+        void InvokeSagaNotFoundHandlers(SagaMetadata sagaMetadata)
         {
-            logger.InfoFormat("Could not find a saga of type '{0}' for the message type '{1}'. Going to invoke SagaNotFoundHandlers.", sagaType.FullName, currentContext.IncomingLogicalMessage.MessageType.FullName);
+            logger.InfoFormat("Could not find a saga '{0}' for the message '{1}'. Going to invoke SagaNotFoundHandlers.", sagaMetadata.Name, currentContext.IncomingLogicalMessage.MessageType.FullName);
 
             foreach (var handler in currentContext.Builder.BuildAll<IHandleSagaNotFound>())
             {
