@@ -1,4 +1,4 @@
-namespace NServiceBus.Sagas.Finders
+namespace NServiceBus.Sagas
 {
     using System;
     using NServiceBus.ObjectBuilder;

@@ -5,7 +5,7 @@ namespace NServiceBus.Sagas
 
     class SagaMetaModel
     {
-        internal SagaMetaModel(IEnumerable<SagaMetadata> foundSagas)
+        public SagaMetaModel(IEnumerable<SagaMetadata> foundSagas)
         {
             var sagas = foundSagas.ToList();
 
@@ -14,11 +14,9 @@ namespace NServiceBus.Sagas
                 byEntityName[saga.EntityName] = saga;
             }
 
-            foreach (var saga in sagas.SelectMany(s => s.AssociatedMessages).Distinct())
+            foreach (var saga in sagas)
             {
-                var messageType = saga.MessageType;
-
-                byMessageType[messageType] = sagas.Where(s => s.AssociatedMessages.Any(m => m.MessageType == messageType)).ToList();
+                byName[saga.Name] = saga;
             }
         }
 
@@ -34,23 +32,10 @@ namespace NServiceBus.Sagas
 
         public SagaMetadata FindByName(string name)
         {
-            //todo - add a more efficient lookup
-            return byEntityName.Values.Single(m => m.Name == name);
-        }
-
-        public IEnumerable<SagaMetadata> FindByMessageType(string messageType)
-        {
-            List<SagaMetadata> result;
-
-            if(!byMessageType.TryGetValue(messageType,out result))
-            {
-                return new List<SagaMetadata>();
-            }
-
-            return result;
+            return byName[name];
         }
 
         Dictionary<string,SagaMetadata> byEntityName = new Dictionary<string, SagaMetadata>();
-        Dictionary<string, List<SagaMetadata>> byMessageType = new Dictionary<string, List<SagaMetadata>>(); 
+        Dictionary<string, SagaMetadata> byName = new Dictionary<string, SagaMetadata>(); 
     }
 }

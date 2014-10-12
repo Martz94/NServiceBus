@@ -7,7 +7,6 @@ namespace NServiceBus.Sagas
     using System.Reflection;
     using System.Runtime.Serialization;
     using NServiceBus.Saga;
-    using NServiceBus.Sagas.Finders;
     using NServiceBus.Utils.Reflection;
 
     class TypeBasedSagaMetaModel

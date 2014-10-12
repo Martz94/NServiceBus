@@ -38,15 +38,7 @@ namespace NServiceBus.Core.Tests.Sagas.TypeBasedSagas
             Assert.NotNull(metadata);
         }
 
-        [Test]
-        public void FindSagasByMessageType()
-        {
-            var model = GetModel(typeof(MySaga));
-
-            Assert.AreEqual(1,model.FindByMessageType(typeof(Message1).FullName).Count());
-            Assert.AreEqual(0,model.FindByMessageType(typeof(Message2).FullName).Count());
-        }
-
+    
 
         [Test]
         public void FilterOutNonSagaTypes()

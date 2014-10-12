@@ -5,7 +5,6 @@
     using System.Linq;
     using NServiceBus.Saga;
     using NServiceBus.Sagas;
-    using NServiceBus.Sagas.Finders;
     using NUnit.Framework;
     using Conventions = NServiceBus.Conventions;
 

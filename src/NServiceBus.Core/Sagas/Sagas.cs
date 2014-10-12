@@ -35,10 +35,8 @@
         protected internal override void Setup(FeatureConfigurationContext context)
         {
             // Register the Saga related behavior for incoming messages
-            context.Pipeline.Register<AssociateMessageWithSagasBehavior.Registration>();
             context.Pipeline.Register<SagaPersistenceBehavior.Registration>();
 
-      
             var typeBasedSagas = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes(),conventions);
 
 

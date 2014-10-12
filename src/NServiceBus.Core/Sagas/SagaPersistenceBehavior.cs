@@ -1,8 +1,6 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
@@ -22,25 +20,29 @@
 
         public IMessageHandlerRegistry MessageHandlerRegistry { get; set; }
 
-        public SagaConfigurationCache SagaConfigurationCache { get; set; }
+        public SagaMetaModel SagaMetaModel { get; set; }
 
         public void Invoke(IncomingContext context, Action next)
         {
-            var potentialSagasForThisHandler = context.Get<IEnumerable<SagaMetadata>>();
+            currentContext = context;
 
-         
-            //todo - improve
-            var sagaMetadata = potentialSagasForThisHandler.SingleOrDefault(metadata => metadata.Name == context.MessageHandler.Instance.GetType().FullName);
+            // We need this for backwards compatibility because in v4.0.0 we still have this headers being sent as part of the message even if MessageIntent == MessageIntentEnum.Publish
+            if (context.PhysicalMessage.MessageIntent == MessageIntentEnum.Publish)
+            {
+                context.PhysicalMessage.Headers.Remove(Headers.SagaId);
+                context.PhysicalMessage.Headers.Remove(Headers.SagaType);
+            }
 
-            if (sagaMetadata == null)
+            var saga = context.MessageHandler.Instance as Saga.Saga;
+
+            if (saga == null)
             {
                 next();
                 return;
             }
 
-            currentContext = context;
+            var sagaMetadata = SagaMetaModel.FindByName(context.MessageHandler.Instance.GetType().FullName);
 
-            var saga = (Saga.Saga)context.MessageHandler.Instance;
 
             var sagaInstanceState = new ActiveSagaInstance(saga, sagaMetadata);
 
