@@ -215,9 +215,18 @@
                 return loader.Load(SagaPersister, sagaId);
             }
 
-            SagaFinderDefinition finderDefinition;
+            SagaFinderDefinition finderDefinition = null;
 
-            if (!metadata.TryGetFinder(message.MessageType.FullName, out finderDefinition))
+            foreach (var messageType in message.Metadata.MessageHierarchy)
+            {
+                if (metadata.TryGetFinder(messageType.FullName, out finderDefinition))
+                {
+                    break;
+                }
+            }
+
+            //check if we could find a finder
+            if (finderDefinition == null)
             {
                 return null;
             }
