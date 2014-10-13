@@ -213,15 +213,13 @@
         }
 
         IContainSagaData TryLoadSagaEntity(SagaMetadata metadata, LogicalMessage message)
-        {
-
-            var sagaEntityType = (Type)metadata.Properties["entity-clr-type"];
-
+        {         
             string sagaId;
 
-            //todo - we should check saga type as well, add failing test first
             if (message.Headers.TryGetValue(Headers.SagaId, out sagaId) && !string.IsNullOrEmpty(sagaId))
             {
+                var sagaEntityType = (Type)metadata.Properties["entity-clr-type"];
+
                 //since we have a saga id available we can now shortcut the finders and just load the saga
                 var loaderType = typeof(LoadSagaByIdWrapper<>).MakeGenericType(sagaEntityType);
 
@@ -255,7 +253,6 @@
 
             var sagaEntity = (IContainSagaData)Activator.CreateInstance(sagaEntityType);
 
-            //todo -make pluggable
             sagaEntity.Id = CombGuid.Generate();
             sagaEntity.OriginalMessageId = message.Headers[Headers.MessageId];
 

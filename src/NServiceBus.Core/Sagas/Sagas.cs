@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Saga;
     using NServiceBus.Sagas;
 
@@ -39,21 +40,9 @@
 
             var typeBasedSagas = TypeBasedSagaMetaModel.Create(context.Settings.GetAvailableTypes(),conventions);
 
-
             var sagaMetaModel = new SagaMetaModel(typeBasedSagas);
 
-            foreach (var finder in sagaMetaModel.All.SelectMany(m=>m.Finders))
-            {
-                context.Container.ConfigureComponent(finder.Type, DependencyLifecycle.InstancePerCall);
-
-                //todo improve
-                object customFinderType;
-
-                if (finder.Properties.TryGetValue("custom-finder-clr-type", out customFinderType))
-                {
-                    context.Container.ConfigureComponent((Type)customFinderType, DependencyLifecycle.InstancePerCall);
-                }
-            }
+            RegisterCustomFindersInContainer(context.Container, sagaMetaModel);
 
             context.Container.RegisterSingleton(sagaMetaModel);
 
@@ -65,6 +54,21 @@
                 }
             }
 
+        }
+
+        static void RegisterCustomFindersInContainer(IConfigureComponents container, SagaMetaModel sagaMetaModel)
+        {
+            foreach (var finder in sagaMetaModel.All.SelectMany(m => m.Finders))
+            {
+                container.ConfigureComponent(finder.Type, DependencyLifecycle.InstancePerCall);
+
+                object customFinderType;
+
+                if (finder.Properties.TryGetValue("custom-finder-clr-type", out customFinderType))
+                {
+                    container.ConfigureComponent((Type) customFinderType, DependencyLifecycle.InstancePerCall);
+                }
+            }
         }
 
 
