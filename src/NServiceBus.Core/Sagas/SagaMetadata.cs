@@ -5,12 +5,12 @@ namespace NServiceBus.Sagas
     /// <summary>
     /// Contains metadata for known sagas
     /// </summary>
-    public class SagaMetadata
+    class SagaMetadata
     {
-        internal SagaMetadata(IEnumerable<SagaMessage> messages, IEnumerable<SagaFinderDefinition> finders)
+        public SagaMetadata(IEnumerable<SagaMessage> messages, IEnumerable<SagaFinderDefinition> finders)
         {
             Properties = new Dictionary<string, object>();
-            UniqueProperties = new List<string>();
+            CorrelationProperties = new List<string>();
 
             associatedMessages = new Dictionary<string, SagaMessage>();
 
@@ -29,12 +29,11 @@ namespace NServiceBus.Sagas
 
         }
 
-        Dictionary<string, SagaMessage> associatedMessages;
-        Dictionary<string, SagaFinderDefinition> sagaFinders;
+   
         /// <summary>
-        /// Unique properties for this saga
+        /// Properties this saga is correlated on
         /// </summary>
-        public IEnumerable<string> UniqueProperties;
+        public IEnumerable<string> CorrelationProperties;
 
         /// <summary>
         /// The name of the saga
@@ -96,5 +95,7 @@ namespace NServiceBus.Sagas
             return sagaFinders.TryGetValue(messageType,out finderDefinition);
         }
 
+        Dictionary<string, SagaMessage> associatedMessages;
+        Dictionary<string, SagaFinderDefinition> sagaFinders;
     }
 }

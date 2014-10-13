@@ -34,7 +34,7 @@ namespace NServiceBus.Sagas
         /// <summary>
         /// Metadata for this active saga
         /// </summary>
-        public SagaMetadata Metadata { get; private set; }
+        internal SagaMetadata Metadata { get; private set; }
         
         /// <summary>
         /// The actual saga instance

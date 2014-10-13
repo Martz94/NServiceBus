@@ -37,7 +37,7 @@
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySaga));
 
 
-            Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
+            Assert.AreEqual("UniqueProperty", metadata.CorrelationProperties.Single());
         }
 
         [Test]
@@ -46,7 +46,7 @@
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithMappedProperty));
 
 
-            Assert.AreEqual("UniqueProperty", metadata.UniqueProperties.Single());
+            Assert.AreEqual("UniqueProperty", metadata.CorrelationProperties.Single());
         }
 
         [Test,Ignore("Not sure we should enforce this yet")]

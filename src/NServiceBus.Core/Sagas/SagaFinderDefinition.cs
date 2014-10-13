@@ -6,7 +6,7 @@ namespace NServiceBus.Sagas
     /// <summary>
     /// Defines a message finder
     /// </summary>
-    public class SagaFinderDefinition   
+    class SagaFinderDefinition   
     {
         internal SagaFinderDefinition()
         {

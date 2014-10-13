@@ -80,7 +80,7 @@ namespace NServiceBus.InMemory.SagaPersister
             var sagaMetaData = sagaModel.FindByEntityName(saga.GetType().FullName);
 
 
-            if (!sagaMetaData.UniqueProperties.Any()) return;
+            if (!sagaMetaData.CorrelationProperties.Any()) return;
 
             var sagasFromSameType = from s in data
                                     where
@@ -88,7 +88,7 @@ namespace NServiceBus.InMemory.SagaPersister
                                     select s.Value;
 
             foreach (var storedSaga in sagasFromSameType)
-                foreach (var uniquePropertyName in sagaMetaData.UniqueProperties)
+                foreach (var uniquePropertyName in sagaMetaData.CorrelationProperties)
                 {
                     var uniqueProperty = saga.GetType().GetProperty(uniquePropertyName);
 

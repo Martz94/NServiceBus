@@ -76,7 +76,7 @@ namespace NServiceBus.Sagas
             {
                 Name = sagaType.FullName,
                 EntityName = sagaEntityType.FullName,
-                UniqueProperties = uniquePropertiesOnEntity.Distinct(),
+                CorrelationProperties = uniquePropertiesOnEntity.Distinct(),
 
             };
 
