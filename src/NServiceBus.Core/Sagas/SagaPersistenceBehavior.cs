@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Linq;
     using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
@@ -55,7 +56,7 @@
             {
                 
                 //if this message are not allowed to start the saga
-                if (sagaMetadata.IsMessageAllowedToStartTheSaga(context.IncomingLogicalMessage.MessageType.FullName))
+                if (IsMessageAllowedToStartTheSaga(context.IncomingLogicalMessage, sagaMetadata))
                 {
                     sagaInstanceState.AttachNewEntity(CreateNewSagaEntity(sagaMetadata, context.IncomingLogicalMessage));
                 }
@@ -113,23 +114,9 @@
             }
         }
 
-        bool IsAllowedToStartANewSaga(IncomingContext context, ActiveSagaInstance sagaInstanceState)
+        static bool IsMessageAllowedToStartTheSaga(LogicalMessage message, SagaMetadata sagaMetadata)
         {
-            string sagaType;
-
-            if (context.IncomingLogicalMessage.Headers.ContainsKey(Headers.SagaId) &&
-                context.IncomingLogicalMessage.Headers.TryGetValue(Headers.SagaType, out sagaType))
-            {
-                //we want to move away from the assembly fully qualified name since that will break if you move sagas
-                // between assemblies. We use the fullname instead which is enough to identify the saga
-                if (sagaType.StartsWith(sagaInstanceState.SagaType.FullName))
-                {
-                    //so now we have a saga id for this saga and if we can't find it we shouldn't start a new one
-                    return false;
-                }
-            }
-
-            return SagaConfigurationCache.IsAStartSagaMessage(sagaInstanceState.SagaType, context.IncomingLogicalMessage.MessageType);
+            return message.Metadata.MessageHierarchy.Any(messageType => sagaMetadata.IsMessageAllowedToStartTheSaga(messageType.FullName));
         }
 
         [ObsoleteEx(RemoveInVersion = "6.0", TreatAsErrorFromVersion = "5.1", Message = "Enriching the headers for saga related information has been moved to the SagaAudit plugin in ServiceControl.  Add a reference to the Saga audit plugin in your endpoint to get more information.")]
