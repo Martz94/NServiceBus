@@ -22,7 +22,7 @@ namespace NServiceBus.Sagas
         /// <summary>
         /// The type of the saga
         /// </summary>
-        [ObsoleteEx(TreatAsErrorFromVersion = "5", RemoveInVersion = "6",Replacement = ".Metadata.Properties[\"saga-clr-type\"]")]
+        [ObsoleteEx(TreatAsErrorFromVersion = "6", RemoveInVersion = "7",Replacement = ".Metadata.Properties[\"saga-clr-type\"]")]
         public Type SagaType 
         {
             get
@@ -39,7 +39,7 @@ namespace NServiceBus.Sagas
         /// <summary>
         /// The actual saga instance
         /// </summary>
-        [ObsoleteEx(TreatAsErrorFromVersion = "5",RemoveInVersion = "6")]
+        [ObsoleteEx(TreatAsErrorFromVersion = "6",RemoveInVersion = "7")]
         public Saga Instance { get; private set; }
         
         /// <summary>

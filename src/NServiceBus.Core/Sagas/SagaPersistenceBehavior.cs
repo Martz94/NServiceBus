@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using NServiceBus.Logging;
-    using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Saga;
@@ -289,10 +288,5 @@
                 InsertAfter("SetCurrentMessageBeingHandled");
             }
         }
-    }
-
-    abstract class SagaFinder
-    {
-        internal abstract IContainSagaData Find(IBuilder builder,SagaFinderDefinition finderDefinition, LogicalMessage message);
     }
 }

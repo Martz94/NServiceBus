@@ -181,6 +181,7 @@
     <Compile Include="Pipeline\PipelineModifications.cs" />
     <Compile Include="Sagas\CustomFinderAdapter.cs" />
     <Compile Include="Sagas\LoadSagaByIdWrapper.cs" />
+    <Compile Include="Sagas\SagaFinder.cs" />
     <Compile Include="Sagas\SagaFinderDefinition.cs" />
     <Compile Include="Sagas\SagaMessage.cs" />
     <Compile Include="Sagas\SagaMetadata.cs" />
