@@ -8,7 +8,6 @@ namespace NServiceBus.Saga
     /// or register implementations of it in the container unless you intend
     /// to substantially change the way sagas work in nServiceBus.
     /// </summary>
-    [ObsoleteEx(RemoveInVersion = "6.1",TreatAsErrorFromVersion = "6.0",Message = "Not an extension point, should not have been pulbic")]
     public interface IConfigureHowToFindSagaWithMessage
     {
         /// <summary>
@@ -17,12 +16,5 @@ namespace NServiceBus.Saga
         /// which saga entity property in the persistent saga store.
         /// </summary>
         void ConfigureMapping<TSagaEntity, TMessage>(Expression<Func<TSagaEntity, object>> sagaEntityProperty, Expression<Func<TMessage, object>> messageProperty) where TSagaEntity : IContainSagaData;
-
-        /// <summary>
-        /// Registers a custom finder
-        /// </summary>
-        /// <param name="finderType">The finder type</param>
-        /// <param name="messageType">The message type for this finder</param>
-        void ConfigureCustomFinder(Type finderType,Type messageType);
     }
 }

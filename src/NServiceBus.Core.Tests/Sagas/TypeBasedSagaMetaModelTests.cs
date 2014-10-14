@@ -11,7 +11,7 @@
     [TestFixture]
     public class TypeBasedSagaMetaModelTests
     {
-      
+
 
         [Test]
         public void GetEntityClrType()
@@ -49,7 +49,7 @@
             Assert.AreEqual("UniqueProperty", metadata.CorrelationProperties.Single());
         }
 
-        [Test,Ignore("Not sure we should enforce this yet")]
+        [Test, Ignore("Not sure we should enforce this yet")]
         public void RequireFinderForMessagesStartingTheSaga()
         {
             var ex = Assert.Throws<Exception>(() => TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty)));
@@ -64,7 +64,7 @@
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithUnmappedStartProperty));
             SagaFinderDefinition finder;
 
-            Assert.False(metadata.TryGetFinder(typeof(MessageThatStartsTheSaga).FullName,out finder));
+            Assert.False(metadata.TryGetFinder(typeof(MessageThatStartsTheSaga).FullName, out finder));
         }
 
         [Test]
@@ -91,22 +91,11 @@
         {
             var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithMappedProperty));
 
-            var finder = GetFinder(metadata,typeof(SomeMessage).FullName);
+            var finder = GetFinder(metadata, typeof(SomeMessage).FullName);
 
             Assert.AreEqual(typeof(PropertySagaFinder<MySagaWithMappedProperty.SagaData>), finder.Type);
             Assert.NotNull(finder.Properties["property-accessor"]);
             Assert.AreEqual("UniqueProperty", finder.Properties["saga-property-name"]);
-        }
-
-        [Test]
-        public void RegisterCustomFindersFromMappings()
-        {
-            var metadata = TypeBasedSagaMetaModel.Create(typeof(MySagaWithCustomFinder));
-
-            var finder = GetFinder(metadata,typeof(SomeMessage).FullName);
-
-            Assert.AreEqual(typeof(CustomFinderAdapter<MySagaWithCustomFinder.SagaData, SomeMessage>), finder.Type);
-            Assert.AreEqual(typeof(MySagaWithCustomFinder.MyCustomFinder), finder.Properties["custom-finder-clr-type"]);
         }
 
         [Test]
@@ -147,32 +136,6 @@
             {
                 mapper.ConfigureMapping<SomeMessage>(m => m.SomeProperty)
                     .ToSaga(s => s.UniqueProperty);
-            }
-        }
-
-        class MySagaWithCustomFinder : Saga<MySagaWithCustomFinder.SagaData>, IAmStartedByMessages<SomeMessage>
-        {
-            public class SagaData : ContainSagaData
-            {
-            }
-
-            protected override void ConfigureHowToFindSaga(SagaPropertyMapper<SagaData> mapper)
-            {
-                mapper.UseCustomFinder<MyCustomFinder>()
-                    .ForMessage<SomeMessage>();
-            }
-
-            internal class MyCustomFinder : IFindSagas<SagaData>.Using<SomeMessage>
-            {
-                public SagaData FindBy(SomeMessage message)
-                {
-                    return null;
-                }
-            }
-
-            public void Handle(SomeMessage message)
-            {
-
             }
         }
 

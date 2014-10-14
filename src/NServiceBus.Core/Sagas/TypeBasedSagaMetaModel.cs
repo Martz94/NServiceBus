@@ -57,21 +57,6 @@ namespace NServiceBus.Sagas
             var associatedMessages = GetAssociatedMessages(sagaType)
                 .ToList();
 
-            //foreach (var associatedMessage in associatedMessages)
-            //{
-            //    if (!associatedMessage.IsAllowedToStartSaga)
-            //    {
-            //        continue;
-            //    }
-
-            //    // var finder = finders.SingleOrDefault(f => f.MessageType == associatedMessage.MessageType);
-
-            //    //if (finder == null)
-            //    //{
-            //    //    throw new Exception(string.Format("All messages starting a saga needs to have a configured finder. Please add a mapping for message: '{0}' to saga type '{1}'",associatedMessage.MessageType,sagaType.FullName));
-            //    //}
-            //}
-
             var metadata = new SagaMetadata(associatedMessages, finders)
             {
                 Name = sagaType.FullName,
